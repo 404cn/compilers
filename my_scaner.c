@@ -4,14 +4,17 @@
 #include <ctype.h>
 #include "cJSON.h"
 
+
 int lookup(char *);
 FILE* open_file(char *, char *);
 cJSON* parse_json();
 void scaner(char *);
 void out(int, char *);
 
+
 // 用来存放单词
 char TOKEN[50];
+
 
 /*
  * c:相应单词的类别码
@@ -19,52 +22,11 @@ char TOKEN[50];
  * 将类别码与相应的数据串以格式化的形式写入文件
  */
 void out (int c, char *val) {
-    FILE *fp = open_file("./Resault.txt", "r+");
+    FILE *fp = open_file("./Resault.txt", "at+");
     fprintf(fp, "(%d, %s)\n", c, val);
     fclose(fp);
 }
 
-/*
- * str：需要查找单词分类码表的字符串
- * 若查到，返回相应的类别码
- * 否则返回0(标识符)
- */
-int lookup (char *str) {
-    int id = 0;
-    cJSON *root = parse_json();
-    
-
-    // TODO: 段错误！！！
-    // 表中没有char ， 返回NULL ， lookup函数返回int， 段错误
-    if (NULL == (cJSON_GetObjectItem(root, str))) {
-        return 0;
-    }
-    else
-    {
-        id = cJSON_GetObjectItem(root, str)->valueint;
-        // 删除根节点，否则会出现内存泄露
-        cJSON_Delete(root);
-    }
-
-    return id;
-}
-
-/*
- * file:需要打开的文件路径
- * 打开成功返回文件描述符
- * 失败则退出程序（待改善）
- */
-FILE* open_file (char *file, char *mode) {
-    FILE *fp;
-    
-    if (NULL == (fp = fopen(file, mode))) {
-        printf("open file error, press any key to exit ...\n");
-        getchar();
-        exit(1);
-    }
-
-    return fp;
-}
 
 /*
  * 按cJSON的格式序列化整个数据包
@@ -99,6 +61,48 @@ cJSON* parse_json () {
     return root;
 }
 
+
+/*
+ * str：需要查找单词分类码表的字符串
+ * 若查到，返回相应的类别码
+ * 否则返回0(标识符)
+ */
+int lookup (char *str) {
+    int id = 0;
+    cJSON *root = parse_json();
+    
+    if (NULL == (cJSON_GetObjectItem(root, str))) {
+        return 0;
+    }
+    else
+    {
+        id = cJSON_GetObjectItem(root, str)->valueint;
+        // 删除根节点，否则会出现内存泄露
+        cJSON_Delete(root);
+    }
+
+    return id;
+}
+
+
+/*
+ * file:需要打开的文件路径
+ * 打开成功返回文件描述符
+ * 失败则退出程序（待改善）
+ */
+FILE* open_file (char *file, char *mode) {
+    FILE *fp;
+    
+    if (NULL == (fp = fopen(file, mode))) {
+        printf("open file error, press any key to exit ...\n");
+        getchar();
+        exit(1);
+    }
+
+    return fp;
+}
+
+
 /*
  * file:需要进行词法分析的文件路径
  */
@@ -106,114 +110,117 @@ void scaner (char *file) {
     FILE *fp = open_file(file, "r");
     char ch;
     int i, c;
-    ch = fgetc(fp);
-    if (isalpha(ch)) {
-        int id = lookup("id");
-        TOKEN[0] = ch;
-        ch = fgetc(fp);
-        i = 1;
-        while (isalnum(ch)) {
-            TOKEN[i++] = ch;
+    while (EOF != (ch = fgetc(fp))) {
+        if ((' ' == ch) || ('\n' == ch)) {
             ch = fgetc(fp);
+            continue;
         }
-        TOKEN[i] = '\0'; // 在单词末尾添加结束符
-        fseek(fp, -1, 1); // 回退一个字符
-
-        // TODO: 段错误！！！！
-        c = lookup(TOKEN);
-
-        if (0 == c) {
-            out(c, TOKEN);
-        }
-        else
-        {
-            out(c, " ");
-        }
-    }
-    else
-    {
-        if (isdigit(ch)) {
-            int INT = lookup("INT");
+        if (isalpha(ch)) {
             TOKEN[0] = ch;
             ch = fgetc(fp);
             i = 1;
-            while (isdigit(ch)) {
+            while (isalnum(ch)) {
                 TOKEN[i++] = ch;
                 ch = fgetc(fp);
             }
-            TOKEN[i] = '\0';
-            fseek(fp, -1, 1);
-            out(INT, TOKEN);
+            TOKEN[i] = '\0'; // 在单词末尾添加结束符
+            fseek(fp, -1, 1); // 回退一个字符
+
+            c = lookup(TOKEN);
+
+            if (0 == c) {
+                out(c, TOKEN);
+            }
+            else
+            {
+                out(c, " ");
+            }
         }
         else
         {
-            switch (ch)
+            if (isdigit(ch)) {
+                c = lookup("INT");
+                TOKEN[0] = ch;
+                ch = fgetc(fp);
+                i = 1;
+                while (isdigit(ch) && ' ' != fgetc(fp)) {
+                    TOKEN[i++] = ch;
+                    ch = fgetc(fp);
+                }
+                TOKEN[i] = '\0';
+                fseek(fp, -1, 1);
+                out(c, TOKEN);            
+            }
+            else
             {
-                case '<':
-                    ch = fgetc(fp);
-                    if ('=' == ch) {
-                        out(lookup("<="), "<=");
-                    }
-                    else
-                    {
-                        fseek(fp, -1, 1);
-                        out(lookup("<"), "<");
-                    }
-                    break;
-                case '>':
-                    ch = fgetc(fp);
-                    if ('=' == ch) {
-                        out(lookup(">="), ">=");
-                    }
-                    else
-                    {
-                        fseek(fp, -1, 1);
-                        out(lookup(">"), ">");
-                    }
-                    break;
-                case '=':
-                    ch = fgetc(fp);
-                    if ('=' == ch) {
-                        out(lookup("=="), "==");
-                    }
-                    else
-                    {
-                        fseek(fp, -1, 1);
-                        out(lookup("="), "=");
-                    }
-                    break;
-                case '!':
-                    ch = fgetc(fp);
-                    if ('=' == ch) {
-                        out(lookup("!="), "!=");
-                    }
-                    else
-                    {
-                        printf("在表中没有查到到对应的符号.\n");
-                        getchar();
-                    }
-                    break;
-                case ',': out(lookup(","), ","); break;
-                case ';': out(lookup(";"), ";"); break;
-                case '(': out(lookup("("), "("); break;
-                case ')': out(lookup(")"), ")"); break;
-                case '{': out(lookup("{"), "{"); break;
-                case '}': out(lookup("}"), "}"); break;
-                case '+': out(lookup("+"), "+"); break;
-                case '-': out(lookup("-"), "-"); break;
-                case '*': out(lookup("*"), "*"); break;
-                case '/': out(lookup("/"), "/"); break;
-            
-                default:
-                    printf("在表中没有查到到对应的符号.\n");
-                    getchar();
-                    break;
+                switch (ch)
+                {
+                    case '<':
+                        ch = fgetc(fp);
+                        if ('=' == ch) {
+                            out(lookup("<="), "<=");
+                        }
+                        else
+                        {
+                            fseek(fp, -1, 1);
+                            out(lookup("<"), "<");
+                        }
+                        break;
+                    case '>':
+                        ch = fgetc(fp);
+                        if ('=' == ch) {
+                            out(lookup(">="), ">=");
+                        }
+                        else
+                        {
+                            fseek(fp, -1, 1);
+                            out(lookup(">"), ">");
+                        }
+                        break;
+                    case '=':
+                        ch = fgetc(fp);
+                        if ('=' == ch) {
+                            out(lookup("=="), "==");
+                        }
+                        else
+                        {
+                            fseek(fp, -1, 1);
+                            out(lookup("="), "=");
+                        }
+                        break;
+                    case '!':
+                        ch = fgetc(fp);
+                        if ('=' == ch) {
+                            out(lookup("!="), "!=");
+                        }
+                        else
+                        {
+                            printf("在表中没有查到到对应的符号.\n");
+                            getchar();
+                        }
+                        break;
+                    case ',': out(lookup(","), ","); break;
+                    case ';': out(lookup(";"), ";"); break;
+                    case '(': out(lookup("("), "("); break;
+                    case ')': out(lookup(")"), ")"); break;
+                    case '{': out(lookup("{"), "{"); break;
+                    case '}': out(lookup("}"), "}"); break;
+                    case '+': out(lookup("+"), "+"); break;
+                    case '-': out(lookup("-"), "-"); break;
+                    case '*': out(lookup("*"), "*"); break;
+                    case '/': out(lookup("/"), "/"); break;
+                
+                    default:
+                        printf("%c不在表中\n", ch);
+                        break;
+                }
             }
         }
     }
     fclose(fp);
     return;
 }
+
 
 int main (int argc, char* argv[]) {
     if (2 == argc) {
