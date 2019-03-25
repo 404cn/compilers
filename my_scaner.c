@@ -112,7 +112,6 @@ void scaner (char *file) {
     int i, c;
     while (EOF != (ch = fgetc(fp))) {
         if ((' ' == ch) || ('\n' == ch)) {
-            ch = fgetc(fp);
             continue;
         }
         if (isalpha(ch)) {
@@ -211,7 +210,7 @@ void scaner (char *file) {
                     case '/': out(lookup("/"), "/"); break;
                 
                     default:
-                        printf("%c不在表中\n", ch);
+                        printf("程序出错, 符号%c不在表中\n", ch);
                         break;
                 }
             }
