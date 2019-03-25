@@ -142,7 +142,7 @@ void scaner (char *file) {
                 TOKEN[0] = ch;
                 ch = fgetc(fp);
                 i = 1;
-                while (isdigit(ch) && ' ' != fgetc(fp)) {
+                while (isdigit(ch)) {
                     TOKEN[i++] = ch;
                     ch = fgetc(fp);
                 }
@@ -229,18 +229,6 @@ int main (int argc, char* argv[]) {
     {
         printf("请输入正确的格式!\n");
     }
-
-/*
-    cJSON *root = parse_json();   
-    cJSON *test = cJSON_GetObjectItem(root, "main");
-    if (test != NULL) {
-        char *test_main = cJSON_Print(test);
-        printf("main:%s\n", test_main);
-        free(test_main);
-    }
-    int id = lookup("main");
-    printf("id : %d\n", id);
-*/
 
     return 0;
 }
