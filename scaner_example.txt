@@ -1,0 +1,15 @@
+char TOKEN[20];
+extern report_error (void);
+
+void scanner_example (FILE * fp) {
+    char ch;
+    int i, c;
+    ch = fgetc(fp);
+    if (isalpha(ch)) {
+        while(isalnum(ch)) {
+            TOKEN[i++] = ch;
+            ch = fgetc(fp);
+        }
+    }
+    else
+}
