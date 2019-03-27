@@ -19,7 +19,8 @@ char TOKEN[50];
 /*
  * c:相应单词的类别码
  * val:字母数字串 | 空串 | 数字串
- * 将类别码与相应的数据串以格式化的形式写入文件
+ * 将类别码与相应的数据串以格式化的形式写入文件(追加到文件末尾并重置EOF)
+ * 如果是保留字则只写入对应的编码, val为' '
  */
 void out (int c, char *val) {
     FILE *fp = open_file("./Resault.txt", "at+");
@@ -194,8 +195,31 @@ void scaner (char *file) {
                         }
                         else
                         {
-                            printf("在表中没有查到到对应的符号.\n");
-                            getchar();
+                            printf("错误：符号%c不在表中.\n", ch);
+                            exit(1);
+                        }
+                        break;
+                    case '/': 
+                        ch = fgetc(fp);
+                        if ('*' == ch) {
+                            while (EOF != (ch = fgetc(fp))) {
+                                if ((' ' == ch) || ('\n' == ch)) {
+                                    continue;
+                                }
+                                if ('*' == ch) {
+                                    if ('/' == (ch = fgetc(fp))) {
+                                        break;       
+                                    }
+                                }
+                            }
+                        }
+                        else if ('/' == ch) {
+                            char *blackhole = (char *)malloc(82);
+                            fgets(blackhole, 81, fp);
+                            free(blackhole);
+                        }
+                        else {
+                            out(lookup("/"), "/"); 
                         }
                         break;
                     case ',': out(lookup(","), ","); break;
@@ -207,10 +231,10 @@ void scaner (char *file) {
                     case '+': out(lookup("+"), "+"); break;
                     case '-': out(lookup("-"), "-"); break;
                     case '*': out(lookup("*"), "*"); break;
-                    case '/': out(lookup("/"), "/"); break;
                 
                     default:
-                        printf("程序出错, 符号%c不在表中\n", ch);
+                        printf("错误：符号%c不在表中\n", ch);
+                        exit(1);
                         break;
                 }
             }
