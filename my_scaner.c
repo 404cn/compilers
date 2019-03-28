@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "cJSON.h"
+// 编译时要链接libm库     -lm
 
 
 int lookup(char *);
@@ -95,8 +96,7 @@ FILE* open_file (char *file, char *mode) {
     FILE *fp;
     
     if (NULL == (fp = fopen(file, mode))) {
-        printf("open file error, press any key to exit ...\n");
-        getchar();
+        printf("open file error.\n");
         exit(1);
     }
 
@@ -112,7 +112,7 @@ void scaner (char *file) {
     char ch;
     int i, c;
     while (EOF != (ch = fgetc(fp))) {
-        if ((' ' == ch) || ('\n' == ch)) {
+        if ((' ' == ch) || ('\n' == ch) || ('\t' == ch)) {
             continue;
         }
         if (isalpha(ch)) {
@@ -203,7 +203,7 @@ void scaner (char *file) {
                         ch = fgetc(fp);
                         if ('*' == ch) {
                             while (EOF != (ch = fgetc(fp))) {
-                                if ((' ' == ch) || ('\n' == ch)) {
+                                if ((' ' == ch) || ('\n' == ch) || ('\t' == ch)) {
                                     continue;
                                 }
                                 if ('*' == ch) {
