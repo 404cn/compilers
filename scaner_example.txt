@@ -3,7 +3,6 @@
 
 
 */
-!*
 void scanner (FILE * fp) {
     char ch;
     int i, c;

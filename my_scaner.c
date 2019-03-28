@@ -11,11 +11,29 @@ FILE* open_file(char *, char *);
 cJSON* parse_json();
 void scaner(char *);
 void out(int, char *);
+long long convertDecimalToBinary(int);
 
 
 // 用来存放单词
 char TOKEN[50];
 
+/*
+ * num : 需要转换为二进制的十进制数
+ */
+long long convertDecimalToBinary(int num)
+{
+    long long binaryNumber = 0;
+    int remainder, i = 1;
+ 
+    while (num != 0)
+    {
+        remainder = num % 2;
+        num /= 2;
+        binaryNumber += remainder * i;
+        i *= 10;
+    }
+    return binaryNumber;
+}
 
 /*
  * c:相应单词的类别码
@@ -23,9 +41,9 @@ char TOKEN[50];
  * 将类别码与相应的数据串以格式化的形式写入文件(追加到文件末尾并重置EOF)
  * 如果是保留字则只写入对应的编码, val为' '
  */
-void out (int c, char *val) {
+void out(int c, char *val) {
     FILE *fp = open_file("./Resault.txt", "at+");
-    fprintf(fp, "(%d, %s)\n", c, val);
+    fprintf(fp, "(%d, %s)\n", convertDecimalToBinary(c), val);
     fclose(fp);
 }
 
@@ -35,7 +53,7 @@ void out (int c, char *val) {
  * 成功则返回json结构体
  * 序列化失败程序退出（待改善）
  */
-cJSON* parse_json () {
+cJSON* parse_json() {
     FILE *fp = open_file("./scaner.json", "r");
 
     // 获得文件长度，然后讲文件指针恢复到开始处
@@ -69,7 +87,7 @@ cJSON* parse_json () {
  * 若查到，返回相应的类别码
  * 否则返回0(标识符)
  */
-int lookup (char *str) {
+int lookup(char *str) {
     int id = 0;
     cJSON *root = parse_json();
     
@@ -92,7 +110,7 @@ int lookup (char *str) {
  * 打开成功返回文件描述符
  * 失败则退出程序（待改善）
  */
-FILE* open_file (char *file, char *mode) {
+FILE* open_file(char *file, char *mode) {
     FILE *fp;
     
     if (NULL == (fp = fopen(file, mode))) {
@@ -107,7 +125,7 @@ FILE* open_file (char *file, char *mode) {
 /*
  * file:需要进行词法分析的文件路径
  */
-void scaner (char *file) {
+void scaner(char *file) {
     FILE *fp = open_file(file, "r");
     char ch;
     int i, c;
@@ -226,6 +244,8 @@ void scaner (char *file) {
                     case ';': out(lookup(";"), ";"); break;
                     case '(': out(lookup("("), "("); break;
                     case ')': out(lookup(")"), ")"); break;
+                    case '[': out(lookup("["), "["); break;
+                    case ']': out(lookup("]"), "]"); break;
                     case '{': out(lookup("{"), "{"); break;
                     case '}': out(lookup("}"), "}"); break;
                     case '+': out(lookup("+"), "+"); break;
@@ -245,7 +265,7 @@ void scaner (char *file) {
 }
 
 
-int main (int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
     if (2 == argc) {
         scaner(argv[1]);
     }

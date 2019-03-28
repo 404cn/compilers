@@ -15,18 +15,24 @@ int translate(int shi){
     return er;
 
 }
-
+long long convertDecimalToBinary(int num)
+{
+    long long binaryNumber = 0;
+    int remainder, i = 1;
+ 
+    while (num != 0)
+    {
+        remainder = num % 2;
+        num /= 2;
+        binaryNumber += remainder * i;
+        i *= 10;
+    }
+    return binaryNumber;
+}
 
 int main () {
 
-    if (10100 == translate(20)) {
-        printf("函数正确.\n");
-    }
-    else
-    {
-        printf("错了，接着写.\n");
-    }
-    
+    printf("%d", convertDecimalToBinary(100));
     
 
     return 0;
