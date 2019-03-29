@@ -5,6 +5,8 @@
 #include "cJSON.h"
 // 编译时要链接libm库     -lm
 
+#define true  1;
+#define false 0;
 
 int lookup(char *);
 FILE* open_file(char *, char *);
@@ -12,6 +14,7 @@ cJSON* parse_json();
 void scaner(char *);
 void out(int, char *);
 long long convertDecimalToBinary(int);
+int isSpaceNT(char);
 
 
 // 用来存放单词
@@ -72,7 +75,6 @@ cJSON* parse_json() {
     if (NULL == root) {
         printf("error : %s\n", cJSON_GetErrorPtr());
         cJSON_Delete(root);
-        printf("press any key to exit ...\n");
         exit(1);
     }
 
@@ -121,6 +123,19 @@ FILE* open_file(char *file, char *mode) {
     return fp;
 }
 
+/*
+ * ch: 需要判断的字符
+ * 判断字符是否为 空格，换行符， 制表符
+ * 是：返回1， 否则返回0
+ */
+int isSpaceNT(char ch) {
+    if ((' ' == ch) || ('\n' == ch) || ('\t' == ch)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 /*
  * file:需要进行词法分析的文件路径
@@ -129,10 +144,12 @@ void scaner(char *file) {
     FILE *fp = open_file(file, "r");
     char ch;
     int i, c;
+    // 循环，读取到文件结束
     while (EOF != (ch = fgetc(fp))) {
-        if ((' ' == ch) || ('\n' == ch) || ('\t' == ch)) {
+        if (isSpaceNT(ch)) {
             continue;
         }
+        // 判断是否为字母开头
         if (isalpha(ch)) {
             TOKEN[0] = ch;
             ch = fgetc(fp);
@@ -141,8 +158,8 @@ void scaner(char *file) {
                 TOKEN[i++] = ch;
                 ch = fgetc(fp);
             }
-            TOKEN[i] = '\0'; // 在单词末尾添加结束符
-            fseek(fp, -1, 1); // 回退一个字符
+            TOKEN[i] = '\0';
+            fseek(fp, -1, 1); 
 
             c = lookup(TOKEN);
 
@@ -156,6 +173,7 @@ void scaner(char *file) {
         }
         else
         {
+            // 判断是否为数字开头
             if (isdigit(ch)) {
                 c = lookup("INT");
                 TOKEN[0] = ch;
@@ -221,7 +239,7 @@ void scaner(char *file) {
                         ch = fgetc(fp);
                         if ('*' == ch) {
                             while (EOF != (ch = fgetc(fp))) {
-                                if ((' ' == ch) || ('\n' == ch) || ('\t' == ch)) {
+                                if (isSpaceNT(ch)) {
                                     continue;
                                 }
                                 if ('*' == ch) {
@@ -252,6 +270,24 @@ void scaner(char *file) {
                     case '-': out(lookup("-"), "-"); break;
                     case '*': out(lookup("*"), "*"); break;
                 
+                    /*
+                    case '<':case '>':case '=':
+                        ch = fgetc(fp);
+                        if ('=' == ch) {
+                            out(lookup(ch), ch);
+                        }
+                        else
+                        {
+                            fseek(fp, -1, 1);
+                            out(lookup(ch), ch);
+                        }
+                        break;
+                    case ',': case ';': case '(': case ')': 
+                    case '[': case ']': case '{': case '}': 
+                    case '+': case '-': case '*': 
+                        out(lookup(ch), ch);
+                        break;
+                    */
                     default:
                         printf("错误：符号%c不在表中\n", ch);
                         exit(1);
@@ -266,6 +302,8 @@ void scaner(char *file) {
 
 
 int main(int argc, char* argv[]) {
+
+    // 只有正确传输参数后才执行scaner()函数
     if (2 == argc) {
         scaner(argv[1]);
     }

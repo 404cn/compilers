@@ -32,7 +32,10 @@ long long convertDecimalToBinary(int num)
 
 int main () {
 
-    printf("%d", convertDecimalToBinary(100));
+    char a[] = "hello world";
+    char *p = a;
+    printf("%s\n", a);
+    printf("%s\n", p);
     
 
     return 0;
