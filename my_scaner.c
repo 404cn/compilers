@@ -46,7 +46,7 @@ long long convertDecimalToBinary(int num)
  */
 void out(int c, char *val) {
     FILE *fp = open_file("./Resault.txt", "at+");
-    fprintf(fp, "(%d, %s)\n", convertDecimalToBinary(c), val);
+    fprintf(fp, "(%d, %s)\n", c, val);
     fclose(fp);
 }
 

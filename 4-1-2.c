@@ -20,6 +20,7 @@ statments()
     }
     else
     {
+        // yylineno: 提供当前的行数信息
         fprintf(stderr, "%d: Inserting missing semicolon\n", yylineno);
     }
 
