@@ -33,14 +33,17 @@ int main(void)
 
 void lrparser(void)
 {
+    // begin开头
     if (syn == 1)
     {
         scaner(); /*读下一个单词符号*/
         yucu();   /*调用yucu()函数；*/
 
+        // 关键字end
         if (syn == 6)
         {
             scaner();
+            // #且kk==0没有错误
             if ((syn == 0) && (kk == 0))
                 printf("success!\n");
         }
@@ -63,10 +66,12 @@ void lrparser(void)
 void yucu(void)
 {
     statement(); /*调用函数statement();*/
-
+    
+    // ;
     while (syn == 26)
     {
         scaner(); /*读下一个单词符号*/
+        // 关键字
         if (syn != 6)
             statement(); /*调用函数statement();*/
     }
@@ -74,11 +79,14 @@ void yucu(void)
     return;
 }
 
+// 声明
 void statement(void)
 {
+    // 字符
     if (syn == 10)
     {
         scaner(); /*读下一个单词符号*/
+        // :=
         if (syn == 18)
         {
             scaner();     /*读下一个单词符号*/
@@ -92,6 +100,7 @@ void statement(void)
     }
     else
     {
+        // 句子错误
         printf("wrong sentence!\n");
         kk = 1;
     }
@@ -99,10 +108,12 @@ void statement(void)
     return;
 }
 
+// 表达式
 void expression(void)
 {
     term();
 
+    // +,-
     while ((syn == 13) || (syn == 14))
     {
         scaner(); /*读下一个单词符号*/
@@ -112,10 +123,12 @@ void expression(void)
     return;
 }
 
+// 项
 void term(void)
 {
     factor();
 
+    // *,/
     while ((syn == 15) || (syn == 16))
     {
         scaner(); /*读下一个单词符号*/
@@ -125,17 +138,21 @@ void term(void)
     return;
 }
 
+// 因子
 void factor(void)
 {
     if ((syn == 10) || (syn == 11))
     {
+        // 字符或数字
         scaner();
     }
     else if (syn == 27)
+    // :
     {
         scaner();     /*读下一个单词符号*/
         expression(); /*调用函数statement();*/
 
+        // )
         if (syn == 28)
         {
             scaner(); /*读下一个单词符号*/
