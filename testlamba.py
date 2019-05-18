@@ -60,8 +60,6 @@ with open('./result.txt', 'r') as f:
 with open('./result.txt', 'r') as f:
     ch=f.read(1)
     i = 0
-    while ch:
+    while (ch = f.read(1)) and ch:
         print(ch)
-        ch = f.read(1)
-        i+=1
     print(i)

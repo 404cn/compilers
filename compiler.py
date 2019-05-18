@@ -19,7 +19,7 @@ def scaner(file):
     with open(file, 'r') as f:
         _EXAMPLE = StringIO(f.read())
     # 每次从file中读取制定字节数
-    getCharFromProgram = lambda x=1: _EXAMPLE.read(x)
+    getCharFromFile = lambda x=1: _EXAMPLE.read(x)
 
     # 获取编码文件并序列化为字典
     with open('./scaner.json', 'r') as f:
@@ -34,59 +34,56 @@ def scaner(file):
         Result.seek(0)
         Result.truncate()
 
-    while True:
+    ch = getCharFromFile()
+    while ch:
         # token: 用来连接读取到的字符
         token = ''
-        ch = getCharFromProgram()
         while ch in [' ', '\n', '\t']:
-            continue
-        # 判断是否到文件结束
-        if ch:
-            # 是否以字母开始或全是字母
-            if ch.isalpha():
+            ch = getCharFromFile()
+        # 是否以字母开始或全是字母
+        if ch.isalpha():
+            token += ch
+            ch = getCharFromFile()
+            # 是否全是字母或数字
+            while ch.isalnum():
                 token += ch
-                ch = getCharFromProgram()
-                # 是否全是字母或数字
-                while ch.isalnum():
-                    token += ch
-                    ch = getCharFromProgram()
-                # 将文件指针前移一位
-                _EXAMPLE.seek(-1, 1)
-                # 如果不在编码文件中，则为用户自定义标志符，否则为保留字
-                if token not in SCANER:
-                    _Result.write("(%d, %s)\n", 0, '')
-                else:
-                    _Result.write("(%d, %s)\n", SCANER[token], token)
-            elif ch.isdigit():
+                ch = getCharFromFile()
+            # 如果不在编码文件中，则为用户自定义标志符，否则为保留字
+            if token not in SCANER:
+                _Result.write("(%d, %s)\n", 0, '')
+            else:
+                _Result.write("(%d, %s)\n", SCANER[token], token)
+        elif ch.isdigit():
+            token += ch
+            ch = getCharFromFile()
+            # TODO: 判断负数与小数
+            while ch.isdigit():
                 token += ch
-                ch = getCharFromProgram()
-                # TODO: 判断负数与小数
-                while ch.isdigit():
-                    token += ch
-                    ch = getCharFromProgram()
+                ch = getCharFromFile()
+            # 将字符串转换为二进制存储
+            _Result.write("(%d, %s)\n", 1, int(str2int(token), base=2))
+        elif ch in [',', ';', '+', '-', '*', '=', '.']:
+            _Result.write("(%d, %s)\n", SCANER[ch], ch)
+        elif ch in ['>', '<', ':']:
+            token += ch
+            ch = getCharFromFile()
+            if ch == '=':
+                token += ch
+                _Result.write("(%d, %s)\n", SCANER[token], token)
+            else:
                 _EXAMPLE.seek(-1, 1)
-                # 将字符串转换为二进制存储
-                _Result.write("(%d, %s)\n", 1, int(str2int(token), base=2))
-            elif ch in [',', ';', '+', '-', '*', '=', '.']:
                 _Result.write("(%d, %s)\n", SCANER[ch], ch)
-            elif ch in ['>', '<', ':']:
-                token += ch
-                ch = getCharFromProgram()
-                if ch == '=':
-                    token += ch
-                    _Result.write("(%d, %s)\n", SCANER[token], token)
-                else:
-                    _EXAMPLE.seek(-1, 1)
-                    _Result.write("(%d, %s)\n", SCANER[ch], ch)
-            elif ch == '/':
-                ch = getCharFromProgram()
-                if ch == '/': _EXAMPLE.readline()
-                elif ch == '*': # TODO: 判断多行注释
-                else:
-                    _EXAMPLE.seek(-1, 1)
-                    _Result.write("(%d, %s)\n", SCANER[ch], ch)
-            else: print("unknown symbol %s.", ch)
-        else: break
+        elif ch == '/':
+            ch = getCharFromFile()
+            if ch == '/': _EXAMPLE.readline()
+            elif ch == '*': 
+                while ch:
+                    if getCharFromFile() == '*' and getCharFromFile() == '/':
+                        break
+            else:
+                _EXAMPLE.seek(-1, 1)
+                _Result.write("(%d, %s)\n", SCANER[ch], ch)
+        else: print("unknown symbol %s.", ch)
     Result.writer(_Result.getvalue())
     Result.close()
 
