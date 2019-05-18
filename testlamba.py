@@ -59,7 +59,8 @@ with open('./result.txt', 'r') as f:
                     
 with open('./result.txt', 'r') as f:
     ch=f.read(1)
-    i = 0
-    while (ch = f.read(1)) and ch:
-        print(ch)
+    while ch:
+        while ch == '/' and f.read(1) == '*':
+            f.read(1)
+            
     print(i)

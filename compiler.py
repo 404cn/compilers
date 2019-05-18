@@ -5,11 +5,24 @@ from io import StringIO
 from functools import reduce
 
 # 将字符串转换为整形
-DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
+DIGITS = {
+    '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
+    '5': 5, '6': 6, '7': 7, '8': 8, '9': 9
+    }
 def char2num(s):
     return DIGITS[s]
 def str2int(s):
     return reduce(lambda x, y: x * 10 + y, map(char2num, s))
+
+# 获取编码文件并序列化为字典
+with open('./scaner.json', 'r') as f:
+    SCANER = json.loads(f.read())
+
+"""
+构造一个格式化的字符串: (%d, %s)\n
+"""
+def buildFormatStr(token2code, token):
+    return "(%d, %s)"%(SCANER[token2code], token)
 
 """
 对file文件进行词法分析，将结果以格式化的形式写入
@@ -21,12 +34,6 @@ def scaner(file):
     # 每次从file中读取制定字节数
     getCharFromFile = lambda x=1: _EXAMPLE.read(x)
 
-    # 获取编码文件并序列化为字典
-    with open('./scaner.json', 'r') as f:
-        SCANER = json.loads(f.read())
-    # result: 内存中用来存放结果的数据流
-    _Result = StringIO('')
-
     # 如果文件不存在会自动创建
     Result = open('./result.txt', 'at+')
     # 如果文件不为空则删除文件内容
@@ -34,6 +41,8 @@ def scaner(file):
         Result.seek(0)
         Result.truncate()
 
+    # result: 内存中用来存放结果的数据流
+    _Result = StringIO('')
     ch = getCharFromFile()
     while ch:
         # token: 用来连接读取到的字符
@@ -50,9 +59,9 @@ def scaner(file):
                 ch = getCharFromFile()
             # 如果不在编码文件中，则为用户自定义标志符，否则为保留字
             if token not in SCANER:
-                _Result.write("(%d, %s)\n", 0, '')
+                _Result.write(buildFormatStr("ID", ''))
             else:
-                _Result.write("(%d, %s)\n", SCANER[token], token)
+                _Result.write(buildFormatStr(token,token))
         elif ch.isdigit():
             token += ch
             ch = getCharFromFile()
@@ -61,18 +70,18 @@ def scaner(file):
                 token += ch
                 ch = getCharFromFile()
             # 将字符串转换为二进制存储
-            _Result.write("(%d, %s)\n", 1, int(str2int(token), base=2))
+            _Result.write(buildFormatStr("NUM", int(str2int(token), base=2)))
         elif ch in [',', ';', '+', '-', '*', '=', '.']:
-            _Result.write("(%d, %s)\n", SCANER[ch], ch)
+            _Result.write(buildFormatStr(ch, ch))
         elif ch in ['>', '<', ':']:
             token += ch
             ch = getCharFromFile()
             if ch == '=':
                 token += ch
-                _Result.write("(%d, %s)\n", SCANER[token], token)
+                _Result.write(buildFormatStr(token, token))
             else:
                 _EXAMPLE.seek(-1, 1)
-                _Result.write("(%d, %s)\n", SCANER[ch], ch)
+                _Result.write(buildFormatStr(ch, ch))
         elif ch == '/':
             ch = getCharFromFile()
             if ch == '/': _EXAMPLE.readline()
@@ -82,9 +91,11 @@ def scaner(file):
                         break
             else:
                 _EXAMPLE.seek(-1, 1)
-                _Result.write("(%d, %s)\n", SCANER[ch], ch)
-        else: print("unknown symbol %s.", ch)
-    Result.writer(_Result.getvalue())
+                _Result.write(buildFormatStr(ch, ch))
+        else: 
+            print("unknown symbol %s"%ch)
+            break
+    Result.write(_Result.getvalue())
     Result.close()
 
 def main():

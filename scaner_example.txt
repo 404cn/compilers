@@ -1,11 +1,8 @@
-void scanner (FILE * fp) {
-    char ch;
-    int i, c;
-    ch = fgetc(fp);
-    if (isalpha(ch)) {
-        while(isalnum(ch)) {
-            ch = fgetc(fp);
-        }
-    }
-    else
-}
+//  111 
+222/*ab c
+de f
+g h*/444
+
+BEGIN a,void;1234.
+    REAL:=213,REAL+1>=ELSE-1*2/4,
+    END
