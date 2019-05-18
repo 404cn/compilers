@@ -39,7 +39,7 @@ def scaner(file):
         token = ''
         ch = getCharFromProgram()
         while ch in [' ', '\n', '\t']:
-            ch = getCharFromProgram()
+            continue
         # 判断是否到文件结束
         if ch:
             # 是否以字母开始或全是字母
@@ -85,15 +85,15 @@ def scaner(file):
                 else:
                     _EXAMPLE.seek(-1, 1)
                     _Result.write("(%d, %s)\n", SCANER[ch], ch)
-            else:
-                print("unknown symbol %s.", ch)
-        else:
-            break
+            else: print("unknown symbol %s.", ch)
+        else: break
     Result.writer(_Result.getvalue())
     Result.close()
 
-if __name__ == "__main__":
+def main():
     if (sys.argv[1]) and (len(sys.argv) == 2):
         scaner(sys.argv[1])
     else:
         print("请以正确格式运行。")
+
+main()

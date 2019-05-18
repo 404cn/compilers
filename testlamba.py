@@ -28,6 +28,7 @@ with open('./result.txt', 'at+') as f:
         f.write("void")
 '''
 
+'''
 from functools import reduce
 
 DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
@@ -40,4 +41,27 @@ def str2int(s):
 
 
 print(type(str2int("12345")))
-
+'''
+'''
+with open('./result.txt', 'r') as f:
+    while True:
+        ch = f.read(1)
+        if ch:
+            print(ch)
+            ch = f.read(1)
+            while ch == '/':
+                f.read(1)
+                if ch == '/':
+                    break
+        else: break
+            '''
+        
+                    
+with open('./result.txt', 'r') as f:
+    ch=f.read(1)
+    i = 0
+    while ch:
+        print(ch)
+        ch = f.read(1)
+        i+=1
+    print(i)
