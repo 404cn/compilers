@@ -1,29 +1,43 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+'''
+from io import StringIO
 
 
-def f(x):
-    return {
-            '>': print("this plan 0"),
-            '<': print("this plan 1"),
-            '=': print("this plan 2"),
-        }.get(x)
-f('>')
+_Result = StringIO('')
+_Result.write("a")
+_Result.write("b")
+_Result.write("c")
+_Result.write("d")
+# in fact _Result.write("str" + "\n")
+
+with open('./result.txt', 'at+') as f:
+    f.write(_Result.getvalue())
+    '''
+
+'''
+f = lambda x=2: x**2
+
+print(f(3))
+'''
+'''
+
+with open('./result.txt', 'at+') as f:
+    if f.read() == '':
+        f.write("void")
+'''
+
+from functools import reduce
+
+DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
+
+def char2num(s):
+    return DIGITS[s]
+
+def str2int(s):
+    return reduce(lambda x, y: x * 10 + y, map(char2num, s))
 
 
-def num_to_string(num):
-    numbers = {
-        0 : print("zero"),
-        1 : print("one"),
-        2 : print("two"),
-        3 : print("three")
-    }
-    return numbers.get(num, None)
+print(type(str2int("12345")))
 
-print(num_to_string(0))
-
-dict = {'Name': 'Zara', 'Age': 27}
-
-print ("Value : %s" %  dict.get('Age'))
-print ("Value : %s" %  dict.get('Sex', 'Age'))
