@@ -55,8 +55,7 @@ with open('./result.txt', 'r') as f:
                     break
         else: break
             '''
-        
-                    
+'''
 with open('./result.txt', 'r') as f:
     ch=f.read(1)
     while ch:
@@ -64,3 +63,14 @@ with open('./result.txt', 'r') as f:
             f.read(1)
             
     print(i)
+    '''
+'''
+from io import StringIO, BytesIO
+with open('./example.txt', 'rb') as f:
+        _EXAMPLE = BytesIO(f.read())
+_EXAMPLE.seek(-1, 0)
+print((_EXAMPLE.read(1)).decode('utf-8'))
+'''
+
+b = "222"
+print(bin(int(b)))
