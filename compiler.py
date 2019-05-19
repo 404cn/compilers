@@ -63,14 +63,15 @@ def scaner(file):
             ch = getCharFromFile()
         elif ch in ['>', '<', ':']:
             token += ch
-            ch = getCharFromFile()
-            if ch == '=':
-                token += ch
+            _ch = getCharFromFile()
+            if _ch == '=':
+                token += _ch
                 _Result.write(buildFormatStr(token, token))
                 ch = getCharFromFile()
             else:
                 _EXAMPLE.seek(-1, 1)
                 _Result.write(buildFormatStr(ch, ch))
+                ch = getCharFromFile()
         elif ch == '/':
             _ch = getCharFromFile()
             if _ch == '/':

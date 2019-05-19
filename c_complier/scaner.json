@@ -1,0 +1,22 @@
+{
+    "id" : 0, "INT" : 1,
+    "auto"     : 5,  "short"  : 6,  "int"      : 7,
+    "long"     : 8,  "float"  : 9,  "double"   : 10,
+    "char"     : 11, "struct" : 12, "union"    : 13,
+    "enum"     : 14, "typedef": 15, "const"    : 16,
+    "unsigned" : 17, "signed" : 18, "extern"   : 19,
+    "register" : 20, "static" : 21, "volatile" : 22,
+    "void"     : 23, "if"     : 24, "else"     : 25,
+    "switch"   : 26, "case"   : 27, "for"      : 28,
+    "do"       : 29, "while"  : 30, "goto"     : 31,
+    "continue" : 32, "break"  : 33, "default"  : 34,
+    "sizeof"   : 35, "return" : 36,
+    "(" : 45, ")" : 46,
+    "[" : 47, "]" : 48,
+    "{" : 49, "}" : 50,
+    "," : 51, ";" : 52,
+    "+"  : 65, "-"  : 66, "*"  : 67,
+    "/"  : 68, "="  : 69, "<"  : 70,
+    ">"  : 71, ">=" : 72, "<=" : 73,
+    "==" : 74, "!=" : 75
+}

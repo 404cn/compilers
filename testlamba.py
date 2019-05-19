@@ -72,5 +72,3 @@ _EXAMPLE.seek(-1, 0)
 print((_EXAMPLE.read(1)).decode('utf-8'))
 '''
 
-b = "222"
-print(bin(int(b)))

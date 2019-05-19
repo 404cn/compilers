@@ -1,8 +1,18 @@
-//  111 
-222/*ab c
-de f
-g h*/444
-
-BEGIN a,void;1234.
-    REAL:=213,REAL+1>=ELSE-1*2/4,
-    END
+PROGRAM a1;
+    VAR x, y, z, m, n:INTEGER; f:REAL
+    BEGIN
+        x:=+1,2    // x=1+2
+        y:=-*x,3,2  // y=x*3-2
+        z:=-/y,2,5  // z=y/2-5
+        IF x < z THEN 
+            x:=+1,x 
+        ELSE 
+            z:=-1,z
+        WHILE x <= y DO 
+            x:=+1,x 
+        BEGIN
+            f:=1
+            m:=2
+            n:=3
+        END 
+    END.
