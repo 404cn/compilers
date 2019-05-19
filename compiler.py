@@ -8,7 +8,6 @@ from io import StringIO, BytesIO
 当前目录下的result.txt文件中.
 """
 def scaner(file):
-    # 将字符串转换为整形
     DIGITS = {
         '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
         '5': 5, '6': 6, '7': 7, '8': 8, '9': 9
@@ -63,6 +62,7 @@ def scaner(file):
             ch = getCharFromFile()
         elif ch in ['>', '<', ':']:
             token += ch
+            # 使用_ch代替ch进行判断，否则SCANER[ch]会发生KeyError:ch
             _ch = getCharFromFile()
             if _ch == '=':
                 token += _ch
