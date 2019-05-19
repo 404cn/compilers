@@ -93,8 +93,11 @@ def scaner(file):
     Result.close()
 
 def main():
-    if (sys.argv[1]) and (len(sys.argv) == 2):
+    if len(sys.argv) == 1: 
+        file = input("请输入待分析文件路径：")
+        scaner(file)
+    elif (sys.argv[1]) and (len(sys.argv) == 2):
         scaner(sys.argv[1])
     else:
-        print("请以正确格式运行。")
+        print("文件路径错误.")
 main()
