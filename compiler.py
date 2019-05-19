@@ -22,7 +22,7 @@ with open('./complier.json', 'r') as f:
 构造一个格式化的字符串: (%d, %s)\n
 """
 def buildFormatStr(token2code, token):
-    return "(%d, %s)"%(SCANER[token2code], token)
+    return "(%d, %s)\n"%(SCANER[token2code], token)
 
 """
 对file文件进行词法分析，将结果以格式化的形式写入
@@ -46,7 +46,6 @@ def scaner(file):
     _Result = StringIO('')
     ch = getCharFromFile()
     while ch:
-        print(ch)
         # token: 用来连接读取到的字符
         token = ''
         while ch in [' ', '\n', '\t']:
@@ -61,9 +60,9 @@ def scaner(file):
                 ch = getCharFromFile()
             # 如果不在编码文件中，则为用户自定义标志符，否则为保留字
             if token not in SCANER:
-                _Result.write(buildFormatStr("ID", ''))
+                _Result.write(buildFormatStr("ID", token))
             else:
-                _Result.write(buildFormatStr(token,token))
+                _Result.write(buildFormatStr(token, ''))
         elif ch in DIGITS:
             token += ch
             ch = getCharFromFile()
@@ -87,18 +86,19 @@ def scaner(file):
                 _EXAMPLE.seek(-1, 1)
                 _Result.write(buildFormatStr(ch, ch))
         elif ch == '/':
-            ch = getCharFromFile()
-            if ch == '/':
+            _ch = getCharFromFile()
+            if _ch == '/':
                 _EXAMPLE.readline()
                 ch = getCharFromFile()
-            elif ch == '*': 
-                while ch:
+            elif _ch == '*': 
+                while _ch:
                     if getCharFromFile() == '*' and getCharFromFile() == '/':
                         ch = getCharFromFile()
                         break
             else:
                 _EXAMPLE.seek(-1, 1)
                 _Result.write(buildFormatStr(ch, ch))
+                ch = getCharFromFile()
         else: 
             print("unknown symbol %s"%ch)
             break
