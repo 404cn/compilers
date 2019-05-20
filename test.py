@@ -2,6 +2,16 @@
 # -*- coding: utf-8 -*-
 from io import StringIO
 
+first = {}
+follow = {}
+# 判断字符串是否是非终结符号
+is_vn = lambda x: x.isupper() and len(x) > 1
+# 判断字符串是否是终结符号
+is_vt = lambda x: not is_vn(x)
+# 计算列表中非终结字符的数量
+count_vn = lambda words_of_right: len(list(filter(is_vn, words_of_right)))
+
+
 """
 从文件中获得文法
 """
@@ -42,12 +52,6 @@ def grammer_cut(grammer):
     return grammer_after_cut
 
 # 文法的First集与Follow集，以字典形式存储
-first = {}
-follow = {}
-# 判断字符串是否是非终结符号
-is_vn = lambda x: x.isupper() and len(x) > 1
-# 判断字符串是否是终结符号
-is_vt = lambda x: not is_vn(x)
 
 """
 找到文法中的非终结符vn并为其建立各自的first集和follow集
@@ -83,8 +87,11 @@ def first_vt_to_first(grammer_after_cut):
 找到字符串中第一个非终结字符，没找到反回False
 """
 def first_vn_from_line(line):
-    # 得到右侧第一个字符串
-    words_of_right = line.split('→')[1].split(' ')
+    if line.find('→') != -1:
+        # 得到右侧第一个字符串
+        words_of_right = line.split('→')[1].split(' ')
+    else:
+        words_of_right = line.split(' ')
     length = len(words_of_right)
     for i in range(length):
         if is_vn(words_of_right[i]):
@@ -96,21 +103,29 @@ def first_vn_from_line(line):
 找到字符串中第二个非终结字符，没找到返回False
 """
 def second_vn_from_line(line):
-    length = len(line)
     first_vn = first_vn_from_line(line)
     if first_vn:
         index_of_first_vn = line.find(first_vn)
-        length_of_first_vn = len(vn)
-
-        
+        length_of_first_vn = len(first_vn)
+        return first_vn_from_line(line[index_of_first_vn + length_of_first_vn:])
     else:
         return False
 
 """
-找到字符串中最后一个非终结字符
+找到字符串中最后一个非终结字符，没找到返回False
 """
 def last_vn_from_line(line):
-    pass
+    words_of_right = line.split('→')[1].split(' ')
+    # words_of_right 必须是一个list
+    count = count_vn(words_of_right)   
+    if count == 0: return False
+    elif count == 1: return first_vn_from_line(line)
+    elif count == 2: return second_vn_from_line(line)
+    else:
+        for i in range(len(words_of_right)):
+            if is_vn(words_of_right[-i]):
+                return words_of_right[-i]
+        
 
 
 def main():
@@ -120,5 +135,5 @@ def main():
     init_first_and_follow(grammer_after_cut)
     first_vt_to_first(grammer_after_cut)
     '''
-    print(first_vn_from_line("PROGRAM→program identifier ; PARTOFPROGRAM"))
+    print(last_vn_from_line("PROGRAM→program IDENTIFIER ; PARTOFPROGRAM ASDSADAD"))
 main()
