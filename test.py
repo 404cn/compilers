@@ -41,22 +41,24 @@ first = {}
 follow = {}
 
 # 找到文法中的非终结符vn并为其建立各自的first集和follow集
-def init_first_and_follow(grammer):
+def init_first_and_follow(grammer_after_cut):
     vns = []
     global first
     global follow
-    for i in range(len(grammer)):
-        line = grammer[i].split('→')
+    for i in range(len(grammer_after_cut)):
+        line = grammer_after_cut[i].split('→')
         vn = line[0]
         if vn not in vns:
-            vns.append(line[0])
+            vns.append(vn)
     for i in range(len(vns)):
         first[vns[i]] = []
         follow[vns[i]] = []
     follow[vns[0]].append('$')
 
+def  
+
 def main():
     grammer = grammer_from_file()
-    vns = grammer_cut(grammer)
-    print(init_first_and_follow(vns))
+    grammer_after_cut = grammer_cut(grammer)
+    print(init_first_and_follow(grammer_after_cut))
 main()
