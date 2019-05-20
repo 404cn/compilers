@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from io import StringIO
 
+# 文法的First集与Follow集，以字典形式存储
 first = {}
 follow = {}
 # 判断字符串是否是非终结符号
@@ -9,11 +10,11 @@ is_vn = lambda x: x.isupper() and len(x) > 1
 # 判断字符串是否是终结符号
 is_vt = lambda x: not is_vn(x)
 # 计算列表中非终结字符的数量
-count_vn = lambda words_of_right: len(list(filter(is_vn, words_of_right)))
+count_vn = lambda list_of_right: len(list(filter(is_vn, list_of_right)))
 
 
 """
-从文件中获得文法
+从文件中获得文法，成功则返回一个list，其中每个元素为一行产生式.
 """
 def grammer_from_file():
     # 声明一个文法列表，用来保存各个文法的产生式子
@@ -30,7 +31,8 @@ def grammer_from_file():
     return grammer
 
 """
-把包含选择运算符的产生式分为两个
+把包含选择运算符的产生式分为两个.
+grammer: list, 文法列表，每个元素为文法的一行产生式.
 """
 def grammer_cut(grammer):
     grammer_after_cut = []
@@ -51,10 +53,9 @@ def grammer_cut(grammer):
             grammer_after_cut.append(grammer[i])
     return grammer_after_cut
 
-# 文法的First集与Follow集，以字典形式存储
-
 """
-找到文法中的非终结符vn并为其建立各自的first集和follow集
+找到文法中的非终结符vn并为其建立各自的first集和follow集.
+grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
 """
 def init_first_and_follow(grammer_after_cut):
     vns = []
@@ -70,8 +71,55 @@ def init_first_and_follow(grammer_after_cut):
     follow[vns[0]].append('$')
 
 """
+找到字符串中第一个非终结字符，没找到反回False.
+line: String, 文法中的一行产生式.
+"""
+def first_vn_from_line(line):
+    if line.find('→') != -1:
+        # 得到右侧第一个字符串
+        list_of_right = line.split('→')[1].split(' ')
+    else:
+        list_of_right = line.split(' ')
+    length = len(list_of_right)
+    for i in range(length):
+        if is_vn(list_of_right[i]):
+            return list_of_right[i]
+        elif i == length - 1:
+            return False
+    
+"""
+找到字符串中第二个非终结字符，没找到返回False.
+line: String, 文法中的一行产生式.
+"""
+def second_vn_from_line(line):
+    first_vn = first_vn_from_line(line)
+    if first_vn:
+        index_of_first_vn = line.find(first_vn)
+        length_of_first_vn = len(first_vn)
+        return first_vn_from_line(line[index_of_first_vn + length_of_first_vn:])
+    else:
+        return False
+
+"""
+找到字符串中最后一个非终结字符，没找到返回False.
+line: String, 文法中的一行产生式.
+"""
+def last_vn_from_line(line):
+    list_of_right = line.split('→')[1].split(' ')
+    # list_of_right 必须是一个list
+    count = count_vn(list_of_right)   
+    if count == 0: return False
+    elif count == 1: return first_vn_from_line(line)
+    elif count == 2: return second_vn_from_line(line)
+    else:
+        for i in range(len(list_of_right)):
+            if is_vn(list_of_right[-i]):
+                return list_of_right[-i]
+        
+"""
 扫描文法中每一个产生式，如果右边第一个符号是一个非终结符号，
-就把它加到产生式左边非终结符号的First集中去
+就把它加到产生式左边非终结符号的First集中去.
+grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
 """
 def first_vt_to_first(grammer_after_cut):
     global first, is_vt
@@ -84,56 +132,40 @@ def first_vt_to_first(grammer_after_cut):
             first[vn].append(first_word)
                
 """
-找到字符串中第一个非终结字符，没找到反回False
+扫描文法中的每一个产生式，对于产生式右边第一个符号不是非终结符的情况，
+把右边非终结符First集中的元素加入到左边非终结符的First集中去,
+如果右边非终结符的First集中包含空串ε，则应找到该非终结符之后的一个非终结符,
+把这个非终结符First集中的元素加入到左边非终结符的First集中去，此次类推.
+grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
 """
-def first_vn_from_line(line):
-    if line.find('→') != -1:
-        # 得到右侧第一个字符串
-        words_of_right = line.split('→')[1].split(' ')
-    else:
-        words_of_right = line.split(' ')
-    length = len(words_of_right)
-    for i in range(length):
-        if is_vn(words_of_right[i]):
-            return words_of_right[i]
-        elif i == length - 1:
-            return False
-    
-"""
-找到字符串中第二个非终结字符，没找到返回False
-"""
-def second_vn_from_line(line):
-    first_vn = first_vn_from_line(line)
-    if first_vn:
-        index_of_first_vn = line.find(first_vn)
-        length_of_first_vn = len(first_vn)
-        return first_vn_from_line(line[index_of_first_vn + length_of_first_vn:])
-    else:
-        return False
+def first_not_vt(grammer_after_cut):
+    global first
+    for i in range(len(grammer_after_cut)):
+        line = grammer_after_cut[i]
+        index_of_derive = line.find('→')
+        list_of_right = line.split('→')[1].split(' ')
+        if is_vt(list_of_right[i]):
+            continue
+        first_vn = first_vn_from_line(line)
+        second_vn = second_vn_from_line(line)
+        flag = 1
+        while flag == 1:
+            for 
 
 """
-找到字符串中最后一个非终结字符，没找到返回False
+构造first集.
+grammer: list, 文法列表，每个元素为文法的一行产生式.
 """
-def last_vn_from_line(line):
-    words_of_right = line.split('→')[1].split(' ')
-    # words_of_right 必须是一个list
-    count = count_vn(words_of_right)   
-    if count == 0: return False
-    elif count == 1: return first_vn_from_line(line)
-    elif count == 2: return second_vn_from_line(line)
-    else:
-        for i in range(len(words_of_right)):
-            if is_vn(words_of_right[-i]):
-                return words_of_right[-i]
-        
-
+def first_property(grammer):
+    grammer_after_cut = grammer_cut(grammer)
+    init_first_and_follow()
+    first_vt_to_first(grammer_after_cut)
+    first_not_vt(grammer_after_cut)
+    first_not_vt(grammer_after_cut)
 
 def main():
     '''
     grammer = grammer_from_file()
-    grammer_after_cut = grammer_cut(grammer)
-    init_first_and_follow(grammer_after_cut)
-    first_vt_to_first(grammer_after_cut)
     '''
     print(last_vn_from_line("PROGRAM→program IDENTIFIER ; PARTOFPROGRAM ASDSADAD"))
 main()
