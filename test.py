@@ -24,7 +24,7 @@ def grammer_cut(grammer):
         if '|' in line:
             while True:
                 index_of_or = line.find('|')
-                grammer_after_cut.append(line[:index])
+                grammer_after_cut.append(line[:index_of_or])
                 index_of_derive = line.find('→')
                 new_line = line[:index_of_derive + 1] + line[index_of_or + 1:]
                 if '|' not in new_line:
@@ -43,21 +43,20 @@ follow = {}
 # 找到文法中的非终结符vn并为其建立各自的first集和follow集
 def init_first_and_follow(grammer):
     vns = []
+    global first
+    global follow
     for i in range(len(grammer)):
-        line = grammer[i]
-        for j in range(len(line)):
-            if line[j] >= 'A' and line[j] <= 'Z':
-                if j < len(line) - 1 and line[j + 1] == "'":
-                    vn = line[j] + "'"
-                    if vn not in vns:
-                        vns.append(vn)
-                    else:
-                        vn = line[j] + ''
-                        if vn not in vns:
-                            vns.append(vn)
-
+        line = grammer[i].split('→')
+        vn = line[0]
+        if vn not in vns:
+            vns.append(line[0])
+    for i in range(len(vns)):
+        first[vns[i]] = []
+        follow[vns[i]] = []
+    follow[vns[0]].append('$')
 
 def main():
     grammer = grammer_from_file()
-    print(grammer_cut(grammer))
+    vns = grammer_cut(grammer)
+    print(init_first_and_follow(vns))
 main()
