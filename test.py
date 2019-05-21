@@ -140,8 +140,6 @@ grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为�
 """
 def first_not_vt(grammer_after_cut):
     global first
-    # 标识一个产生式右边如果是所有非终结符是否都包含空
-    flag = False
     for i in range(len(grammer_after_cut)):
         line = grammer_after_cut[i]
         line_cut = line.split('→')
@@ -153,6 +151,8 @@ def first_not_vt(grammer_after_cut):
         if is_vt(list_of_right[0]):
             continue
 
+        # 标识一个产生式右边如果是所有非终结符是否都包含空
+        flag = False
         # 右边列表中下标为index的非终结符的first集，一个列表
         first_index = first[list_of_right[0]]
         # 将右侧第一个非终结符first集中的非空元素全部加到左侧非终结符的first集中
@@ -177,7 +177,7 @@ def first_not_vt(grammer_after_cut):
                     if first_index[j] not in first[vn_of_left] and 'ε' != first_index[j]:
                         first[vn_of_left].append(first_index[j])
                 
-                if index == len(list_of_right):
+                if index == len(list_of_right) - 1:
                     flag = True
 
                 if 'ε' in first_index:
@@ -185,6 +185,8 @@ def first_not_vt(grammer_after_cut):
                 else:
                     break
 
+        if flag:
+            first[vn_of_left].append('ε')
         """
         # 右边列表中下标为index的非终结符的first集，一个列表
         list_index = first[list_of_right[0]]
