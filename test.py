@@ -35,8 +35,7 @@ grammer: list, 文法列表，每个元素为文法的一行产生式.
 """
 def grammer_cut(grammer):
     grammer_after_cut = []
-    for i in range(len(grammer)):
-        line = grammer[i]
+    for line in grammer:
         if '|' in line:
             while True:
                 index_of_or = line.find('|')
@@ -49,7 +48,7 @@ def grammer_cut(grammer):
                 else:
                     line = new_line
         else:
-            grammer_after_cut.append(grammer[i])
+            grammer_after_cut.append(line)
     return grammer_after_cut
 
 """
@@ -59,14 +58,13 @@ grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为�
 def init_first_and_follow(grammer_after_cut):
     vns = []
     global first, follow
-    for i in range(len(grammer_after_cut)):
-        line = grammer_after_cut[i].split('→')
-        vn = line[0]
+    for line in grammer_after_cut:
+        vn = line.split('→')[0]
         if vn not in vns:
             vns.append(vn)
-    for i in range(len(vns)):
-        first[vns[i]] = []
-        follow[vns[i]] = []
+    for key in vns:
+        first[key] = []
+        follow[key] = []
     follow[vns[0]].append('$')
 
 """
@@ -122,13 +120,26 @@ grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为�
 """
 def first_vt_to_first(grammer_after_cut):
     global first, is_vt
-    for i in range(len(grammer_after_cut)):
-        line = grammer_after_cut[i]
+    for line in grammer_after_cut:
         index_of_derive = line.find('→')
         vn = line[:index_of_derive]
         first_word = line[index_of_derive + 1:].split(' ')[0]
         if is_vt(first_word) and first_word not in first[vn]:
             first[vn].append(first_word)
+
+"""
+将first_index中的除了空以外的所有符号加入到first(vn)中
+vn: String, 非终结符
+first_index: list, 需要被加入到first(vn)的列表
+"""
+def list_to_first(vn, first_index):
+    if is_vn(vn) and type(first_index) == list:
+        for value in first_index:
+            # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
+            if value not in first[vn] and 'ε' != value:
+                first[vn].append(value)
+    else:
+        print("传入参数的类型错误.")
 
 """
 扫描文法中的每一个产生式，对于产生式右边第一个符号是非终结符的情况，
@@ -140,10 +151,9 @@ grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为�
 """
 def first_not_vt(grammer_after_cut):
     global first
-    for i in range(len(grammer_after_cut)):
-        line = grammer_after_cut[i]
+    for line in grammer_after_cut:
         line_cut = line.split('→')
-        vn_of_left = line_cut[0]
+        vn = line_cut[0]
         part_of_right = line_cut[1]
         list_of_right = part_of_right.split(' ')
 
@@ -156,72 +166,31 @@ def first_not_vt(grammer_after_cut):
         # 右边列表中下标为index的非终结符的first集，一个列表
         first_index = first[list_of_right[0]]
         # 将右侧第一个非终结符first集中的非空元素全部加到左侧非终结符的first集中
-        for j in range(len(first_index)):
-            # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
-            if first_index[j] not in first[vn_of_left] and 'ε' != first_index[j]:
-                first[vn_of_left].append(first_index[j])
+        list_to_first(vn, first_index)
 
         if 'ε' in first_index:
             for index in range(1, len(list_of_right)):
                 # 如果第一个非终结符后面的词为终结符，则将它加入左侧非终结符的first集中，
                 # 结束这个产生式的循环，分析下个产生式
                 if is_vt(list_of_right[index]):
-                    first[vn_of_left].append(list_of_right[index])
+                    first[vn].append(list_of_right[index])
                     break
 
                 # 右边列表中下标为index的非终结符的first集，一个列表
                 first_index = first[list_of_right[index]]
-
-                for j in range(len(first_index)):
-                    # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
-                    if first_index[j] not in first[vn_of_left] and 'ε' != first_index[j]:
-                        first[vn_of_left].append(first_index[j])
+                list_to_first(vn, first_index)
                 
+                # 如果产生式右边都是非终结符并其first集都包含空
                 if index == len(list_of_right) - 1:
                     flag = True
-
+                # 如果第二个字符为非终结符并包含空，则继续向后查找，否则结束循环
                 if 'ε' in first_index:
                     continue
                 else:
                     break
-
+        # 产生式右边都是非终结符并first集都包含空，则将空加入到左侧非终结符的first集中
         if flag:
-            first[vn_of_left].append('ε')
-        """
-        # 右边列表中下标为index的非终结符的first集，一个列表
-        list_index = first[list_of_right[0]]
-
-        # 将右侧第一个非终结符first集中的非空元素全部加到左侧非终结符的first集中
-        for j in range(len(list_index)):
-            if 'ε' == list_index[j]:
-                continue
-            # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
-            if list_index[j] not in first[vn_of_left]:
-                first[vn_of_left].append(list_index[j])
-                continue
-
-        # 如果空在右侧第一个非终结符的first集中，如果其后面的词为终结符，
-        # 将其中所有非空元素加入到左侧非终结符first集中，如果空在其中，则继续向后查找
-        # 如果非终结符，将其加入左侧非终结符中first集中，停止
-        for j in range(1, len(list_index))
-        if 'ε' in list_index:
-        """
-
-    '''
-    for i in range(len(grammer_after_cut)):
-        # 右侧第一个为终结符，已经添加到左侧非终结符中
-        if is_vt(list_of_right[0]):
-            continue
-        first_vn = first_vn_from_line(grammer_after_cut[i])
-        print(first_vn)
-        for j in range(len(first[first_vn])):
-            if first[first_vn][j] not in first[vn_of_left]:
-                first[vn_of_left].append(first[first_vn][i])
-            elif 'ε' in first[list_of_right[0]]:
-                second_vn = second_vn_from_line(grammer_after_cut[i])
-                if second_vn not in first[vn_of_left]:
-                    first[vn_of_left].extend(first[second_vn])
-                    '''
+            first[vn].append('ε')
 
 """
 构造first集.
