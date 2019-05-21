@@ -131,14 +131,17 @@ def first_vt_to_first(grammer_after_cut):
             first[vn].append(first_word)
 
 """
-扫描文法中的每一个产生式，对于产生式右边第一个符号不是非终结符的情况，
-把右边非终结符First集中的元素加入到左边非终结符的First集中去,
-如果右边非终结符的First集中包含空串ε，则应找到该非终结符之后的一个非终结符,
-把这个非终结符First集中的元素加入到左边非终结符的First集中去，此次类推.
+扫描文法中的每一个产生式，对于产生式右边第一个符号是非终结符的情况，
+把右边非终结符first集中除了空串ε的元素加入到左边非终结符的first集中去,
+如果右边非终结符的first集中包含空串ε，则应找到该非终结符之后的一个非终结符,
+把这个非终结符first集中的元素加入到左边非终结符的first集中去，此次类推.
+如果全都包含空串ε, 则把ε加入到左侧非终结符的first集中去.
 grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
 """
 def first_not_vt(grammer_after_cut):
     global first
+    # 标识一个产生式右边如果是所有非终结符是否都包含空
+    flag = False
     for i in range(len(grammer_after_cut)):
         line = grammer_after_cut[i]
         line_cut = line.split('→')
@@ -149,27 +152,58 @@ def first_not_vt(grammer_after_cut):
         # 跳过右侧第一个是终结符的，因为已经被函数处理过加入到first中
         if is_vt(list_of_right[0]):
             continue
-        
-        # 如果右侧第一个词为终结符，则不用创建这两个变量
-        # 标识右边单词列表的下标，如果空在第一个词中则加1，以此类推
-        index = 0
+
         # 右边列表中下标为index的非终结符的first集，一个列表
-        first_list_index = first[list_of_right[index]]
-
-        for j in (range(len(first_list_index))):
+        first_index = first[list_of_right[0]]
+        # 将右侧第一个非终结符first集中的非空元素全部加到左侧非终结符的first集中
+        for j in range(len(first_index)):
             # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
-            if first_list_index[j] not in first[vn_of_left]:
-                first[vn_of_left].append(first_list_index[j])
+            if first_index[j] not in first[vn_of_left] and 'ε' != first_index[j]:
+                first[vn_of_left].append(first_index[j])
+
+        if 'ε' in first_index:
+            for index in range(1, len(list_of_right)):
+                # 如果第一个非终结符后面的词为终结符，则将它加入左侧非终结符的first集中，
+                # 结束这个产生式的循环，分析下个产生式
+                if is_vt(list_of_right[index]):
+                    first[vn_of_left].append(list_of_right[index])
+                    break
+
+                # 右边列表中下标为index的非终结符的first集，一个列表
+                first_index = first[list_of_right[index]]
+
+                for j in range(len(first_index)):
+                    # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
+                    if first_index[j] not in first[vn_of_left] and 'ε' != first_index[j]:
+                        first[vn_of_left].append(first_index[j])
+                
+                if index == len(list_of_right):
+                    flag = True
+
+                if 'ε' in first_index:
+                    continue
+                else:
+                    break
+
+        """
+        # 右边列表中下标为index的非终结符的first集，一个列表
+        list_index = first[list_of_right[0]]
+
+        # 将右侧第一个非终结符first集中的非空元素全部加到左侧非终结符的first集中
+        for j in range(len(list_index)):
+            if 'ε' == list_index[j]:
                 continue
-#            if 'ε' in first[list_of_right[index]]:
+            # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
+            if list_index[j] not in first[vn_of_left]:
+                first[vn_of_left].append(list_index[j])
+                continue
 
-
-        
-
-        
-        
-        
-    
+        # 如果空在右侧第一个非终结符的first集中，如果其后面的词为终结符，
+        # 将其中所有非空元素加入到左侧非终结符first集中，如果空在其中，则继续向后查找
+        # 如果非终结符，将其加入左侧非终结符中first集中，停止
+        for j in range(1, len(list_index))
+        if 'ε' in list_index:
+        """
 
     '''
     for i in range(len(grammer_after_cut)):
