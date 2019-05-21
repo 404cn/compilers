@@ -128,11 +128,13 @@ def first_vt_to_first(grammer_after_cut):
             first[vn].append(first_word)
 
 """
-将first_index中的除了空以外的所有符号加入到first(vn)中
+将first_index中的除了空以外的所有符号加入到first(vn)中，失败则返回False
 vn: String, 非终结符
 first_index: list, 需要被加入到first(vn)的列表
 """
 def list_to_first(vn, first_index):
+    # TODO:
+    print('找到的vn:' + vn)
     if is_vn(vn) and type(first_index) == list:
         for value in first_index:
             # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
@@ -140,6 +142,33 @@ def list_to_first(vn, first_index):
                 first[vn].append(value)
     else:
         print("传入参数的类型错误.")
+        return False
+
+"""
+查询vn的产生式，若右侧第一个符号为终结符，返回vn，若右侧第一个符号
+为非终结符，则用这个非终结符代替vn继续查找，以此类推
+vn: String, 非终结符
+grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
+"""
+def vt_from_loop(vn, grammer_after_cut):
+    # TODO:
+    print(vn)
+    if is_vn(vn):
+        for line in grammer_after_cut:
+            # 获得产生式左侧的非终结符
+            vn_from_left = line.split('→')[0]
+            # 如果产生式右侧的非终结符与传入函数的非终结符相等
+            if vn == vn_from_left:
+                vt_from_right = line.split('→')[1].split(' ')[0]
+            else:
+                continue
+            if is_vt(vt_from_right):
+                return vn
+            vn = vt_from_right
+            vt_from_loop(vn, grammer_after_cut)
+    else:
+        print("传入参数的类型错误.")
+        return False
 
 """
 扫描文法中的每一个产生式，对于产生式右边第一个符号是非终结符的情况，
@@ -165,6 +194,8 @@ def first_not_vt(grammer_after_cut):
         flag = False
         # 右边列表中下标为index的非终结符的first集，一个列表
         first_index = first[list_of_right[0]]
+        # 获得右侧第一个字符是终结符的vn.
+        vn = vt_from_loop(vn, grammer_after_cut)
         # 将右侧第一个非终结符first集中的非空元素全部加到左侧非终结符的first集中
         list_to_first(vn, first_index)
 
@@ -178,6 +209,7 @@ def first_not_vt(grammer_after_cut):
 
                 # 右边列表中下标为index的非终结符的first集，一个列表
                 first_index = first[list_of_right[index]]
+                vn = vt_from_loop(vn, grammer_after_cut)
                 list_to_first(vn, first_index)
                 
                 # 如果产生式右边都是非终结符并其first集都包含空
@@ -206,8 +238,5 @@ def main():
     grammer_after_cut = grammer_cut(grammer)
     init_first_and_follow(grammer_after_cut)
     first_vt_to_first(grammer_after_cut)
-    print(first)
-    print('\n\n\n')
     first_not_vt(grammer_after_cut)
-    print(first)
 main()

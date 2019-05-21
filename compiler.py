@@ -45,7 +45,7 @@ def scaner(file):
                 ch = char_from_file()
             # 如果不在编码文件中，则为用户自定义标志符，否则为保留字
             if token not in code_file:
-                char2memory.write(format_string("ID", token))
+                char2memory.write(format_string("id", token))
             else:
                 char2memory.write(format_string(token, ''))
         elif ch in digits:
@@ -56,7 +56,7 @@ def scaner(file):
                 token += ch
                 ch = char_from_file()
             # 将字符串转换为二进制存储，二进制以0b开头，故使用[2:]
-            char2memory.write(format_string("NUM", bin(int(token))[2:]))
+            char2memory.write(format_string("num", bin(int(token))[2:]))
         elif ch in [',', ';', '+', '-', '*', '=', '.']:
             char2memory.write(format_string(ch, ch))
             ch = char_from_file()

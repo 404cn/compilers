@@ -1,18 +1,18 @@
-PROGRAM a1;
-    VAR x, y, z, m, n:INTEGER; f:REAL
-    BEGIN
+program a1;
+    var x, y, z, m, n:integer; f:real
+    begin
         x:=+1,2    // x=1+2
         y:=-*x,3,2  // y=x*3-2
         z:=-/y,2,5  // z=y/2-5
-        IF x < z THEN 
+        if x < z then 
             x:=+1,x 
-        ELSE 
+        else 
             z:=-1,z
-        WHILE x <= y DO 
+        while x <= y do 
             x:=+1,x 
-        BEGIN
+        begin
             f:=1
             m:=2
             n:=3
-        END 
-    END.
+        end 
+    end.
