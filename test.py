@@ -146,10 +146,31 @@ def first_not_vt(grammer_after_cut):
         part_of_right = line_cut[1]
         list_of_right = part_of_right.split(' ')
 
+        # 跳过右侧第一个是终结符的，因为已经被函数处理过加入到first中
         if is_vt(list_of_right[0]):
             continue
         
-        print()
+        # 如果右侧第一个词为终结符，则不用创建这两个变量
+        # 标识右边单词列表的下标，如果空在第一个词中则加1，以此类推
+        index = 0
+        # 右边列表中下标为index的非终结符的first集，一个列表
+        first_list_index = first[list_of_right[index]]
+
+        for j in (range(len(first_list_index))):
+            # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
+            if first_list_index[j] not in first[vn_of_left]:
+                first[vn_of_left].append(first_list_index[j])
+                continue
+#            if 'ε' in first[list_of_right[index]]:
+
+
+        
+
+        
+        
+        
+    
+
     '''
     for i in range(len(grammer_after_cut)):
         # 右侧第一个为终结符，已经添加到左侧非终结符中
@@ -180,5 +201,8 @@ def main():
     grammer_after_cut = grammer_cut(grammer)
     init_first_and_follow(grammer_after_cut)
     first_vt_to_first(grammer_after_cut)
+    print(first)
+    print('\n\n\n')
     first_not_vt(grammer_after_cut)
+    print(first)
 main()
