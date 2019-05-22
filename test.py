@@ -171,16 +171,16 @@ def vns_from_loop(vn, grammer_after_cut):
             # 如果不想等则继续查找下一个产生式
             else:
                 continue
-        # 遍历列表中每一个非终结符号
-        for vn_from_vns in vns:
-            # 递归找到右侧为终结符的非终结符
-            new_vns = vns_from_loop(vn_from_vns, grammer_after_cut)
-            # 将其加入列表中
-            vns_finally.extend(new_vns)
-        return vns_finally
     else:
         return False
-    
+    # 遍历列表中每一个非终结符号
+    for vn_from_vns in vns:
+        # 递归找到右侧为终结符的非终结符
+        new_vns = vns_from_loop(vn_from_vns, grammer_after_cut)
+        # 将其加入列表中
+        vns_finally.extend(new_vns)
+    return vns_finally
+
 """
 扫描文法中的每一个产生式，对于产生式右边第一个符号是非终结符的情况，
 把右边非终结符first集中除了空串ε的元素加入到左边非终结符的first集中去,
@@ -191,6 +191,7 @@ grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为�
 """
 def first_not_vt(grammer_after_cut):
     global first
+    vn_already_handle = []
     for line in grammer_after_cut:
         line_cut = line.split('→')
         vn = line_cut[0]
@@ -206,16 +207,18 @@ def first_not_vt(grammer_after_cut):
         # 如果产生式右边都是非终结符并起first集都包含空，也设置为False
         flag_of_one = False
 
-        # 找到右侧第一个字符为终结符的非终结符
-        vns = vns_from_loop(vn, grammer_after_cut)
-        print(vn)
-        print(vns)
+        # 解决重复求vns问题，因为某些非终结符有多个右侧第一个字符为非终结符的产生式
+        if vn not in vn_already_handle:
+            # 找到右侧第一个字符为终结符的非终结符
+            vns = vns_from_loop(vn, grammer_after_cut)
+        vn_already_handle.append(vn)
+
         # 将所有非终结符的first集中除了空以外的元素加入到vn的first集中去
         for vn_from_vns in vns:
             list_to_first(vn, first[vn_from_vns])
             if 'ε' in first[vn_from_vns]:
                 flag_of_one = True
-        
+
         # 如果产生式右边当前非终结符的first集中包含空
         while flag_of_one:
             for index in range(1, len(list_of_right)):
@@ -230,7 +233,7 @@ def first_not_vt(grammer_after_cut):
                     list_to_first(vn, first[vn_from_vns])
                     if 'ε' not in first[vn_from_vns]:
                         flag_of_one = False
-                
+
                 # 如果产生式右边都是非终结符并其first集都包含空
                 if index == len(list_of_right) - 1:
                     flag = True
@@ -257,7 +260,7 @@ def follow_property(grammer_after_cut):
 def main():
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
-    global first
+    vn_already_handle = []
     for line in grammer_after_cut:
         line_cut = line.split('→')
         vn = line_cut[0]
@@ -268,11 +271,13 @@ def main():
         if is_vt(list_of_right[0]):
             continue
 
-        # 找到右侧第一个字符为终结符的非终结符
-        vns = vns_from_loop(vn, grammer_after_cut)
-        print(vn)
-        print(vns)
-        '''
+        if vn not in vn_already_handle:
+            # 找到右侧第一个字符为终结符的非终结符
+            vns = vns_from_loop(vn, grammer_after_cut)
+            print(vn)
+            print(vns)
+        vn_already_handle.append(vn)
+    '''
     init_first_and_follow(grammer_after_cut)
     first_vt_to_first(grammer_after_cut)
     first_not_vt(grammer_after_cut)
