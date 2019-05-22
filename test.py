@@ -161,7 +161,8 @@ def vns_from_loop(vn, grammer_after_cut):
                 # 获得右侧第一个字符
                 vn_from_right = line.split('→')[1].split(' ')[0]
                 # 如果右侧第一个字符为非终结符，将它加入到列表中，继续循环
-                if is_vn(vn_from_right):
+                # 如果该终结符的多个产生式右侧第一个非终结符一样，则只加入一次
+                if is_vn(vn_from_right) and vn_from_right not in vns:
                     vns.append(vn_from_right)
                 # 如果右侧第一个字符为终结符，将传入函数的非终结符加入列表并返回列表
                 # 函数结束，返回列表
@@ -260,6 +261,8 @@ def follow_property(grammer_after_cut):
 def main():
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
+    init_first_and_follow(grammer_after_cut)
+    first_vt_to_first(grammer_after_cut)
     vn_already_handle = []
     for line in grammer_after_cut:
         line_cut = line.split('→')
@@ -278,8 +281,6 @@ def main():
             print(vns)
         vn_already_handle.append(vn)
     '''
-    init_first_and_follow(grammer_after_cut)
-    first_vt_to_first(grammer_after_cut)
     first_not_vt(grammer_after_cut)
     print(first)
     '''
