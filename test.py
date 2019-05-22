@@ -134,12 +134,42 @@ first_index: list, 需要被加入到first(vn)的列表
 """
 def list_to_first(vn, first_index):
     # TODO:
-    print('找到的vn:' + vn)
+    print('\n')
+    print(vn)
+    print('\n')
     if is_vn(vn) and type(first_index) == list:
         for value in first_index:
             # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
             if value not in first[vn] and 'ε' != value:
                 first[vn].append(value)
+    else:
+        print("传入参数的类型错误.")
+        return False
+
+"""
+
+vn: String, 非终结符
+grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
+"""
+def vns_from_loop(vn, grammer_after_cut):
+    vns = []
+    if is_vn(vn):
+        for line in grammer_after_cut:
+            # 获得产生式左侧的非终结符
+            vn_from_left = line.split('→')[0]
+            # 如果产生式左侧的非终结符与传入函数的非终结符相等
+            if vn == vn_from_left:
+                vn_from_right = line.split('→')[1].split(' ')[0]
+                if is_vn(vn_from_right):
+                    vns.append(vn_from_right)
+                else:
+                    vns.append(vn)
+                    break
+            else:
+                continue
+            # TODO:
+        print(vns)
+        return vns
     else:
         print("传入参数的类型错误.")
         return False
@@ -152,20 +182,29 @@ grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为�
 """
 def vt_from_loop(vn, grammer_after_cut):
     # TODO:
-    print(vn)
+    vns = []
     if is_vn(vn):
         for line in grammer_after_cut:
             # 获得产生式左侧的非终结符
             vn_from_left = line.split('→')[0]
             # 如果产生式右侧的非终结符与传入函数的非终结符相等
             if vn == vn_from_left:
-                vt_from_right = line.split('→')[1].split(' ')[0]
+                vn_from_right = line.split('→')[1].split(' ')[0]
+                if is_vn(vn_from_right):
+                    vns.append(vt_from_right)
+                else:
+                    vns.append(vn)
+                    break
             else:
                 continue
+            '''
+            print(vt_from_right)
             if is_vt(vt_from_right):
                 return vn
             vn = vt_from_right
             vt_from_loop(vn, grammer_after_cut)
+            '''
+        print(vns)
     else:
         print("传入参数的类型错误.")
         return False
@@ -236,7 +275,10 @@ def first_property(grammer_after_cut):
 def main():
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
+    vns_from_loop("FACTOR", grammer_after_cut)
+    '''
     init_first_and_follow(grammer_after_cut)
     first_vt_to_first(grammer_after_cut)
     first_not_vt(grammer_after_cut)
+    '''
 main()
