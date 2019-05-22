@@ -253,8 +253,11 @@ def first_not_vt(grammer_after_cut):
 构造first集.
 grammer: list, 文法列表，每个元素为文法的一行产生式.
 """
-def first_property(grammer_after_cut):
-    pass
+def first_property(grammer):
+    grammer_after_cut = grammer_cut(grammer)
+    init_first_and_follow(grammer_after_cut)
+    first_vt_to_first(grammer_after_cut)
+    first_not_vt(grammer_after_cut)
 
 """
 构造follow集.
@@ -266,9 +269,7 @@ def follow_property(grammer_after_cut):
 
 def main():
     grammer = grammer_from_file()
-    grammer_after_cut = grammer_cut(grammer)
-    init_first_and_follow(grammer_after_cut)
-    first_vt_to_first(grammer_after_cut)
+    first_property(grammer)
     """
     vns = vns_from_loop("OPERATIONEXPRESSION", grammer_after_cut)
     print("OPERATIONEXPRESSION")
@@ -291,7 +292,6 @@ def main():
             print(vns)
         vn_already_handle.append(vn)
     """
-    first_not_vt(grammer_after_cut)
     for key in first.keys():
         print(key)
         print(first[key])
