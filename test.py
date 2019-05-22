@@ -152,6 +152,8 @@ grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为�
 def vns_from_loop(vn, grammer_after_cut):
     vns = []
     vns_finally = []
+    # 标记一个非终结符的产生式没有非终结符
+    flag = True
     if is_vn(vn):
         for line in grammer_after_cut:
             # 获得产生式左侧的非终结符
@@ -161,12 +163,13 @@ def vns_from_loop(vn, grammer_after_cut):
                 # 获得右侧第一个字符
                 vn_from_right = line.split('→')[1].split(' ')[0]
                 # 如果右侧第一个字符为非终结符，将它加入到列表中，继续循环
-                # 如果该终结符的多个产生式右侧第一个非终结符一样，则只加入一次
+                # 如果该终非结符的多个产生式右侧第一个非终结符一样，则只加入一次
                 if is_vn(vn_from_right) and vn_from_right not in vns:
                     vns.append(vn_from_right)
+                    flag = False
                 # 如果右侧第一个字符为终结符，将传入函数的非终结符加入列表并返回列表
                 # 函数结束，返回列表
-                elif is_vt(vn_from_right):
+                elif is_vt(vn_from_right) and flag and vn_from_right not in vns:
                     vns.append(vn)
                     return vns
             # 如果不想等则继续查找下一个产生式
@@ -263,6 +266,11 @@ def main():
     grammer_after_cut = grammer_cut(grammer)
     init_first_and_follow(grammer_after_cut)
     first_vt_to_first(grammer_after_cut)
+    """
+    vns = vns_from_loop("OPERATIONEXPRESSION", grammer_after_cut)
+    print("OPERATIONEXPRESSION")
+    print(vns)
+    """
     vn_already_handle = []
     for line in grammer_after_cut:
         line_cut = line.split('→')
@@ -280,8 +288,8 @@ def main():
             print(vn)
             print(vns)
         vn_already_handle.append(vn)
-    '''
+    """j
     first_not_vt(grammer_after_cut)
     print(first)
-    '''
+    """
 main()
