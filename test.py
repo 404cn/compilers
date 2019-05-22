@@ -211,6 +211,9 @@ def first_not_vt(grammer_after_cut):
         # 如果产生式右边都是非终结符并起first集都包含空，也设置为False
         flag_of_one = False
 
+        # 先将产生式右侧第一个非终结符的first集加入到vn的first集中
+        list_to_first(vn, first[list_of_right[0]])
+
         # 解决重复求vns问题，因为某些非终结符有多个右侧第一个字符为非终结符的产生式
         if vn not in vn_already_handle:
             # 找到右侧第一个字符为终结符的非终结符
@@ -270,7 +273,6 @@ def main():
     vns = vns_from_loop("OPERATIONEXPRESSION", grammer_after_cut)
     print("OPERATIONEXPRESSION")
     print(vns)
-    """
     vn_already_handle = []
     for line in grammer_after_cut:
         line_cut = line.split('→')
@@ -288,8 +290,9 @@ def main():
             print(vn)
             print(vns)
         vn_already_handle.append(vn)
-    """j
-    first_not_vt(grammer_after_cut)
-    print(first)
     """
+    first_not_vt(grammer_after_cut)
+    for key in first.keys():
+        print(key)
+        print(first[key])
 main()
