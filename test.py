@@ -148,6 +148,10 @@ def list_to_first(vn, first_of_index):
 成功则返回列表，失败返回False
 vn: String, 非终结符
 grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
+TODO: 待解决问题，非终结符只能在产生式第一个，待处理既有非终结符又有终结符的情况
+        待考虑方案，如果终结符在前，先将vn加入vns，进行下一次循环，如果有非终结符
+        则将非终结符加入vns，从vns中删除先前加入的vn，这样便从vns中排除了自身
+        (需要用到标识非标识是否需要return并结束循环)
 """
 def vns_from_loop(vn, grammer_after_cut):
     vns = []
@@ -263,35 +267,13 @@ def first_property(grammer):
 构造follow集.
 grammer: list, 文法列表，每个元素为文法的一行产生式.
 """
-def follow_property(grammer_after_cut):
+def follow_property(grammer):
     pass
 
 
 def main():
     grammer = grammer_from_file()
     first_property(grammer)
-    """
-    vns = vns_from_loop("OPERATIONEXPRESSION", grammer_after_cut)
-    print("OPERATIONEXPRESSION")
-    print(vns)
-    vn_already_handle = []
-    for line in grammer_after_cut:
-        line_cut = line.split('→')
-        vn = line_cut[0]
-        part_of_right = line_cut[1]
-        list_of_right = part_of_right.split(' ')
-
-        # 跳过右侧第一个是终结符的，因为已经被函数处理过加入到first中
-        if is_vt(list_of_right[0]):
-            continue
-
-        if vn not in vn_already_handle:
-            # 找到右侧第一个字符为终结符的非终结符
-            vns = vns_from_loop(vn, grammer_after_cut)
-            print(vn)
-            print(vns)
-        vn_already_handle.append(vn)
-    """
     for key in first.keys():
         print(key)
         print(first[key])
