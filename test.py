@@ -267,8 +267,15 @@ def first_property(grammer):
 构造follow集.
 grammer: list, 文法列表，每个元素为文法的一行产生式.
 """
-def follow_property(grammer):
-    pass
+#TODO: grammer
+def follow_property(grammer_after_cut):
+    global follow
+    for line in grammer_after_cut:
+        line_cut = line.split('→')
+        vn = line_cut[0]
+        part_of_right = line_cut[1]
+        list_of_right = part_of_right.split(' ')
+        
 
 
 def main():
@@ -277,4 +284,5 @@ def main():
     for key in first.keys():
         print(key)
         print(first[key])
+    print(follow)
 main()

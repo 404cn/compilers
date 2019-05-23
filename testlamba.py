@@ -185,11 +185,11 @@ def scanVT(s):#扫描文法中的每一个产生式，如果箭头→右边有�
 
 #print('____________________________')
 def FFollow(grammer):
-    '''
-          扫描文法的每一个产生式，把第一个非终结符的Follow集去除空串ε加入到最后一个非终结符的Follow集中去
-         如果最后一个非终结符的First集中有空串ε，
-        则把第一个非终结符的Follow集去除空串ε加入到倒数第二个非终结符的FOllow集中去，依次类推
-    '''
+'''
+扫描文法的每一个产生式，把第一个非终结符的Follow集去除空串ε加入到
+最后一个非终结符的Follow集中去,如果最后一个非终结符的First集中有空串ε，
+则把第一个非终结符的Follow集去除空串ε加入到倒数第二个非终结符的FOllow集中去，依次类推
+'''
     for i in range(len(grammer)):
         s = grammer[i]
         vn1 = findFirstVN(s)
