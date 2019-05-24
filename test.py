@@ -346,9 +346,6 @@ def one_vt_vn(grammer_after_cut):
                 vn != list_of_body[-1] and 
                 is_vt(list_of_body[list_of_body.index(vn) + 1])):
                 follow[vn].append(list_of_body[list_of_body.index(vn) + 1])
-                
-
-    
 
 
 def one_last_vn(grammer_after_cut):
@@ -365,14 +362,14 @@ def one_last_vn(grammer_after_cut):
                 head2vn_follow(head_of_production, vn)
 
 
-
-
+# TODO:虽然分产生式又一次vn与多次vn分开求后逻辑清晰一些，但是会多次便利产生式子
+# TODO:带来效率上的下降，并且如ALPHABET与NUM会查几十次。。有待改善
 def one_vn_follow(grammer_after_cut):
     """处理产生式中只出现一次vn的情况
     """
     one_vt_vn(grammer_after_cut)
     one_last_vn(grammer_after_cut)
-
+    # TODO: vn后为vn的函数
 
 
 #TODO: grammer
