@@ -303,6 +303,14 @@ def first2follow(value, vn):
             follow[vn].append(value_of_first)
 
 
+def vt2follow(vt, vn):
+    """将vt加入到vn的follow集中
+    """
+    global follow
+    if vt not in follow[vn]:
+        follow[vn].append(vt)
+
+
 def after_vn(vn, list_of_body):
     """将list_of_body中vn后面的元素加入列表返回
 
@@ -324,6 +332,46 @@ def after_vn(vn, list_of_body):
     return values_after_vn
         
 
+def one_vt_vn(grammer_after_cut):
+    """产生式只有一次vn且vn后为vt，将vt加入vn的follow集中
+    """
+    global follow
+    vns = vns_from_grammer(grammer_after_cut)
+    for vn in vns:
+        for production in grammer_after_cut:  # 遍历每个产生式
+            head_of_production = production.split('→')[0]  # 产生式头
+            list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
+
+            if (list_of_body.count(vn) == 1 and 
+                vn != list_of_body[-1] and 
+                is_vt(list_of_body[list_of_body.index(vn) + 1])):
+                follow[vn].append(list_of_body[list_of_body.index(vn) + 1])
+                
+
+    
+
+
+def one_last_vn(grammer_after_cut):
+    """如果产生式只出现一个vn且vn为最后一个元素，则将产生式头部的follow集加入到vn
+    的follow集中
+    """
+    global follow
+    vns = vns_from_grammer(grammer_after_cut)
+    for vn in vns:
+        for production in grammer_after_cut:  # 遍历每个产生式
+            head_of_production = production.split('→')[0]  # 产生式头
+            list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
+            if list_of_body.count(vn) == 1 and vn == list_of_body[-1]: 
+                head2vn_follow(head_of_production, vn)
+
+
+
+
+def one_vn_follow(grammer_after_cut):
+    """处理产生式中只出现一次vn的情况
+    """
+    one_vt_vn(grammer_after_cut)
+    one_last_vn(grammer_after_cut)
 
 
 
