@@ -143,6 +143,7 @@ def first_vt_to_first(grammer_after_cut):
 
 def list_to_first(vn, first_of_index):
     """将first_of_index中的除了空以外的所有符号加入到first(vn)中，失败则返回False
+
     vn: String, 非终结符
     first_of_index: list, 需要被加入到first(vn)的列表
     """
@@ -155,19 +156,19 @@ def list_to_first(vn, first_of_index):
         return False
 
 
-"""
-如果vn右侧第一个字符为非终结符，则以右侧的非终结符代替vn继续查找，直到
-找到右侧第一个字符为终结符的vn，加入到列表中
-例：A->B|C B->b C->c  将A与文法传入，成功则返回列表['B', 'C']
-成功则返回列表，失败返回False
-vn: String, 非终结符
-grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
-TODO: 待解决问题，非终结符只能在产生式第一个，待处理既有非终结符又有终结符的情况
-        待考虑方案，如果终结符在前，先将vn加入vns，进行下一次循环，如果有非终结符
-        则将非终结符加入vns，从vns中删除先前加入的vn，这样便从vns中排除了自身
-        (需要用到标识非标识是否需要return并结束循环)
-"""
 def vns_from_loop(vn, grammer_after_cut):
+    """如果vn右侧第一个字符为非终结符，则以右侧的非终结符代替vn继续查找，直到
+    找到右侧第一个字符为终结符的vn，加入到列表中
+
+    例：A->B|C B->b C->c  将A与文法传入，成功则返回列表['B', 'C']
+    成功则返回列表，失败返回False
+    vn: String, 非终结符
+    grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
+    TODO: 待解决问题，非终结符只能在产生式第一个，待处理既有非终结符又有终结符的情况
+            待考虑方案，如果终结符在前，先将vn加入vns，进行下一次循环，如果有非终结符
+            则将非终结符加入vns，从vns中删除先前加入的vn，这样便从vns中排除了自身
+            (需要用到标识非标识是否需要return并结束循环)
+    """
     vns = []
     vns_finally = []
     # 标记一个非终结符的产生式没有非终结符
@@ -204,15 +205,15 @@ def vns_from_loop(vn, grammer_after_cut):
     return vns_finally
 
 
-"""
-扫描文法中的每一个产生式，对于产生式右边第一个符号是非终结符的情况，
-把右边非终结符first集中除了空串ε的元素加入到左边非终结符的first集中去,
-如果右边非终结符的first集中包含空串ε，则应找到该非终结符之后的一个非终结符,
-把这个非终结符first集中的元素加入到左边非终结符的first集中去，此次类推.
-如果全都包含空串ε, 则把ε加入到左侧非终结符的first集中去.
-grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
-"""
 def first_not_vt(grammer_after_cut):
+    """扫描文法中的每一个产生式，对于产生式右边第一个符号是非终结符的情况，
+    把右边非终结符first集中除了空串ε的元素加入到左边非终结符的first集中去,
+    如果右边非终结符的first集中包含空串ε，则应找到该非终结符之后的一个非终结符,
+    把这个非终结符first集中的元素加入到左边非终结符的first集中去，此次类推.
+    如果全都包含空串ε, 则把ε加入到左侧非终结符的first集中去.
+
+    grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
+    """
     global first
     vn_already_handle = []
     for line in grammer_after_cut:
@@ -269,11 +270,11 @@ def first_not_vt(grammer_after_cut):
             first[vn].append('ε')
 
 
-"""
-构造first集.
-grammer: list, 文法列表，每个元素为文法的一行产生式.
-"""
 def first_property(grammer):
+    """构造first集.
+
+    grammer: list, 文法列表，每个元素为文法的一行产生式.
+    """
     grammer_after_cut = grammer_cut(grammer)
     init_first_and_follow(grammer_after_cut)
     first_vt_to_first(grammer_after_cut)
