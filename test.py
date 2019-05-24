@@ -29,6 +29,7 @@ def grammer_from_file():
             break
     return grammer
 
+
 """
 把包含选择运算符的产生式分为两个.
 grammer: list, 文法列表，每个元素为文法的一行产生式.
@@ -51,6 +52,7 @@ def grammer_cut(grammer):
             grammer_after_cut.append(line)
     return grammer_after_cut
 
+
 """
 找到文法中的非终结符vn并为其建立各自的first集和follow集.
 grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
@@ -66,6 +68,7 @@ def init_first_and_follow(grammer_after_cut):
         first[key] = []
         follow[key] = []
     follow[vns[0]].append('$')
+
 
 """
 找到字符串中第一个非终结字符，没找到反回False.
@@ -84,6 +87,7 @@ def first_vn_from_line(line):
         elif i == length - 1:
             return False
 
+
 """
 找到字符串中第二个非终结字符，没找到返回False.
 line: String, 文法中的一行产生式.
@@ -96,6 +100,7 @@ def second_vn_from_line(line):
         return first_vn_from_line(line[index_of_first_vn + length_of_first_vn:])
     else:
         return False
+
 
 """
 找到字符串中最后一个非终结字符，没找到返回False.
@@ -113,6 +118,7 @@ def last_vn_from_line(line):
             if is_vn(list_of_right[-i]):
                 return list_of_right[-i]
 
+
 """
 扫描文法中每一个产生式，如果右边第一个符号是一个非终结符号，
 就把它加到产生式左边非终结符号的First集中去.
@@ -127,6 +133,7 @@ def first_vt_to_first(grammer_after_cut):
         if is_vt(first_word) and first_word not in first[vn]:
             first[vn].append(first_word)
 
+
 """
 将first_of_index中的除了空以外的所有符号加入到first(vn)中，失败则返回False
 vn: String, 非终结符
@@ -140,6 +147,7 @@ def list_to_first(vn, first_of_index):
                 first[vn].append(value)
     else:
         return False
+
 
 """
 如果vn右侧第一个字符为非终结符，则以右侧的非终结符代替vn继续查找，直到
@@ -188,6 +196,7 @@ def vns_from_loop(vn, grammer_after_cut):
         # 将其加入列表中
         vns_finally.extend(new_vns)
     return vns_finally
+
 
 """
 扫描文法中的每一个产生式，对于产生式右边第一个符号是非终结符的情况，
@@ -253,6 +262,7 @@ def first_not_vt(grammer_after_cut):
         if flag:
             first[vn].append('ε')
 
+
 """
 构造first集.
 grammer: list, 文法列表，每个元素为文法的一行产生式.
@@ -263,26 +273,53 @@ def first_property(grammer):
     first_vt_to_first(grammer_after_cut)
     first_not_vt(grammer_after_cut)
 
-"""
-构造follow集.
-grammer: list, 文法列表，每个元素为文法的一行产生式.
-"""
+
+def nextval_from_list(vn, list):
+    pass
+
+
 #TODO: grammer
 def follow_property(grammer_after_cut):
+    """
+    构造follow集.
+    grammer: list, 文法列表，每个元素为文法的一行产生式.
+    """
     global follow
-    for line in grammer_after_cut:
-        line_cut = line.split('→')
-        vn = line_cut[0]
-        part_of_right = line_cut[1]
-        list_of_right = part_of_right.split(' ')
-        
+    vns = [] # 用来存储所有非终结符
+    for production in grammer_after_cut:  # 获取所有非终结符，用列表存储(vns)
+        vn = production.split('→')[0]  # 每个产生式的头部都是非终结符
+        if vn not in vns:  # 去除重复的非终结符
+            vns.append(vn)
+    
+    for vn in vns: # 遍历所有非终结符
+        for production in grammer_after_cut:  # 遍历每个产生式
+            head_of_production = production.split('→')[0]  # 产生式头
+            list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
+
+           
+            if vn in list_of_body:  # 如果某个非终结符的产生式中有当前非终结符
+                
+                # 如果该产生式只有一个要查找的非终结符并且此非终结符后没有元素
+                # 则将产生此产生式的非终结符的follow集全部加入到查找的非终结符的follow
+                # 集中(去除重复)，然后继续判断下个产生式
+                if list_of_body.count(vn) == 1 and vn == list_of_body[-1]:
+                    for follow_of_head in follow[head_of_production]:
+                        if follow_of_head not in follow[vn]:
+                            follow[vn].append(follow_of_head)
+                            break
+            else:
+                continue
 
 
 def main():
     grammer = grammer_from_file()
+    grammer_after_cut = grammer_cut(grammer)
+    """
     first_property(grammer)
     for key in first.keys():
         print(key)
         print(first[key])
     print(follow)
+    """
+    follow_property(grammer_after_cut)
 main()
