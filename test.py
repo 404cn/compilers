@@ -53,17 +53,24 @@ def grammer_cut(grammer):
     return grammer_after_cut
 
 
+def vns_from_grammer(grammer_after_cut):
+    """获得一个被分割后文法中的所有非终结符
+    """
+    vns = []
+    for production in grammer_after_cut:  # 获取所有非终结符，用列表存储(vns)
+        vn = production.split('→')[0]  # 每个产生式的头部都是非终结符
+        if vn not in vns:  # 去除重复的非终结符
+            vns.append(vn)
+    return vns
+
+
 """
 找到文法中的非终结符vn并为其建立各自的first集和follow集.
 grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
 """
 def init_first_and_follow(grammer_after_cut):
-    vns = []
     global first, follow
-    for line in grammer_after_cut:
-        vn = line.split('→')[0]
-        if vn not in vns:
-            vns.append(vn)
+    vns = vns_from_grammer(grammer_after_cut)
     for key in vns:
         first[key] = []
         follow[key] = []
@@ -134,12 +141,11 @@ def first_vt_to_first(grammer_after_cut):
             first[vn].append(first_word)
 
 
-"""
-将first_of_index中的除了空以外的所有符号加入到first(vn)中，失败则返回False
-vn: String, 非终结符
-first_of_index: list, 需要被加入到first(vn)的列表
-"""
 def list_to_first(vn, first_of_index):
+    """将first_of_index中的除了空以外的所有符号加入到first(vn)中，失败则返回False
+    vn: String, 非终结符
+    first_of_index: list, 需要被加入到first(vn)的列表
+    """
     if is_vn(vn) and type(first_of_index) == list:
         for value in first_of_index:
             # 将右侧第一个非终结符的first集中除了空全加入到左侧非终结符的first集中
@@ -286,17 +292,38 @@ def head2vn_follow(head_of_production, vn)
             follow[vn].append(follow_of_head)
 
 
-def value_after_vn(vn, list_of_body):
+def first2follow(value, vn):
+    """将value的first集中除了空之外的加入到vn的follow集
+    """
+    global first
+    global follow
+    for value_of_first in first[value]:
+        if value_of_first not in follow[vn] and value_of_first != 'ε':
+            follow[vn].append(value_of_first)
+
+
+def after_vn(vn, list_of_body):
+    """将list_of_body中vn后面的元素加入列表返回
+
+    如果一个产生式中只包含一次vn并且vn为产生式最后一个字符，返回False
+    否则将它后面的元素加入列表中返回
+
+    如果一个产生式含有vn多次，则将每个vn后的字符加入列表中返回
+    """
     values_after_vn = []
     if list_of_body.count(vn) == 1:
         if vn == list_of_body[-1]:
             return False
         else:
-            values_after_vn.append(list_of_body[list_of_body.index(vn)+1])
-            return values_after_vn
+            values_after_vn.append(list_of_body[list_of_body.index(vn) + 1])
     else:
-        for value in list_of_body:
-            
+        for i in range(len(list_of_body) - 1):
+            if list_of_body[i] == vn and list_of_body[i + 1] not in values_after_vn:
+                values_after_vn.append(list_of_body[i + 1])
+    return values_after_vn
+        
+
+
 
 
 #TODO: grammer
@@ -306,39 +333,29 @@ def follow_property(grammer_after_cut):
     grammer: list, 文法列表，每个元素为文法的一行产生式.
     """
     global follow
-    vns = [] # 用来存储所有非终结符
-    for production in grammer_after_cut:  # 获取所有非终结符，用列表存储(vns)
-        vn = production.split('→')[0]  # 每个产生式的头部都是非终结符
-        if vn not in vns:  # 去除重复的非终结符
-            vns.append(vn)
-    
+    vns = vns_from_grammer(grammer_after_cut)  # 用来存储所有非终结符
     for vn in vns: # 遍历所有非终结符
         for production in grammer_after_cut:  # 遍历每个产生式
             head_of_production = production.split('→')[0]  # 产生式头
             list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
 
-           
             if vn in list_of_body:  # 如果某个非终结符的产生式中有当前非终结符
-                # 如果该产生式只有一个要查找的非终结符
-                if list_of_body.count(vn) == 1:
-                    if vn == list_of_body[-1]:  # 如果vn后再无任何元素
-                        head2vn_follow(head_of_production, vn)
-                
-                    else:
-                        # 如果产生式中要查找的vn后有元素
-                        value_after_vn = list_of_body[list_of_body.index(vn)+1]
-                        #  如果后面为终结符则直接加入到vn的follow集中，结束
-                        if is_vt(value_after_vn):
-                            if value_after_vn not in follow[vn]:
-                                follow[vn].append(value_after_vn)
-                        if is_vn(value_after_vn):
-                            flag = True
-                            while flag:
-                                if 'ε' not in first[value_after_vn]:
-                                    flag = False
-                                for first_of_value in first[value_after_vn]:
-                                    if first_of_value not in follow[vn]:
-                                        follow[vn].append(first_of_value)
+                # 获得产生式中vn后面的字符，type:list，有多个vn也一样
+                # 如果只有一个vn并且为产生式最后一个符号则会返回False
+                values_after_vn = after_vn(vn, list_of_body)
+                # 如果该产生式只有一个要查找的vn并且为产生式的最后一个符号
+                if not values_after_vn:
+                    # 将产生式头部非终结符的follow集全部加入vn的follow集中
+                    head2vn_follow(head_of_production, vn)
+                else:
+                    for value in values_after_vn:
+                        if is_vt(value) and value not in follow[vn]:
+                            follow[vn].append(value)
+                            continue
+                        elif is_vn(value):
+                            first2follow(value, vn)
+                            if 'ε' in first[value]:
+
             else:
                 continue
 
