@@ -274,8 +274,29 @@ def first_property(grammer):
     first_not_vt(grammer_after_cut)
 
 
-def nextval_from_list(vn, list):
-    pass
+def head2vn_follow(head_of_production, vn)
+    """将head_of_production的follow集中的元素全部加入vn的follow集中.
+    
+    会去除重复的，但是不会去除空，此函数用于产生式中vn后的vn中包含空或者
+    vn在产生式中只出现一次并后面没有任何元素的情况
+    """
+    global follow
+    for follow_of_head in follow[head_of_production]:
+        if follow_of_head not in follow[vn]:
+            follow[vn].append(follow_of_head)
+
+
+def value_after_vn(vn, list_of_body):
+    values_after_vn = []
+    if list_of_body.count(vn) == 1:
+        if vn == list_of_body[-1]:
+            return False
+        else:
+            values_after_vn.append(list_of_body[list_of_body.index(vn)+1])
+            return values_after_vn
+    else:
+        for value in list_of_body:
+            
 
 
 #TODO: grammer
@@ -298,15 +319,26 @@ def follow_property(grammer_after_cut):
 
            
             if vn in list_of_body:  # 如果某个非终结符的产生式中有当前非终结符
+                # 如果该产生式只有一个要查找的非终结符
+                if list_of_body.count(vn) == 1:
+                    if vn == list_of_body[-1]:  # 如果vn后再无任何元素
+                        head2vn_follow(head_of_production, vn)
                 
-                # 如果该产生式只有一个要查找的非终结符并且此非终结符后没有元素
-                # 则将产生此产生式的非终结符的follow集全部加入到查找的非终结符的follow
-                # 集中(去除重复)，然后继续判断下个产生式
-                if list_of_body.count(vn) == 1 and vn == list_of_body[-1]:
-                    for follow_of_head in follow[head_of_production]:
-                        if follow_of_head not in follow[vn]:
-                            follow[vn].append(follow_of_head)
-                            break
+                    else:
+                        # 如果产生式中要查找的vn后有元素
+                        value_after_vn = list_of_body[list_of_body.index(vn)+1]
+                        #  如果后面为终结符则直接加入到vn的follow集中，结束
+                        if is_vt(value_after_vn):
+                            if value_after_vn not in follow[vn]:
+                                follow[vn].append(value_after_vn)
+                        if is_vn(value_after_vn):
+                            flag = True
+                            while flag:
+                                if 'ε' not in first[value_after_vn]:
+                                    flag = False
+                                for first_of_value in first[value_after_vn]:
+                                    if first_of_value not in follow[vn]:
+                                        follow[vn].append(first_of_value)
             else:
                 continue
 
