@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from io import StringIO
+try:
+    import pandas as pd
+except ModuleNotFoundError:
+    print("错误:没有安装pandas.")
+
 
 # 文法的First集与Follow集，以字典形式存储
 first = {}
@@ -62,6 +67,19 @@ def vns_from_grammer(grammer_after_cut):
         if vn not in vns:  # 去除重复的非终结符
             vns.append(vn)
     return vns
+
+
+def vts_from_grammer(grammer_after_cut):
+    """获得一个被分割文法后的所有终结符
+    """
+    vts = []
+    for production in grammer_after_cut: 
+        list_of_body = production.split('→')[1].split(' ')
+        for vt in list_of_body:
+            if is_vt(vt) and vt not in vts:
+                vts.append(vt)
+    return vts
+    
 
 
 """
@@ -503,6 +521,24 @@ def first_and_follow():
     follow_property(grammer)
 
 
+def init_data_frame(grammer_after_cut):
+    vns = vns_from_grammer(grammer_after_cut)
+    vts = vts_from_grammer(grammer_after_cut)
+    dict_of_vts = {}
+    for vt in vts:
+        dict_of_vts[vt] = []
+        for i in range(len(vns)):
+            dict_of_vts[vt].append('')
+    dict_of_vts['$'] = []
+    for i in range(len(vns)):
+        dict_of_vts['$'].append('')
+    data_frame = pd.DataFrame(dict_of_vts, index=vns)
+    return data_frame
+
 def main():
-    first_and_followd()
+    first_and_follow()
+    # TODO: 一开始获得文法的时候就应该cut，有时间再改
+    grammer = grammer_from_file()
+    grammer_after_cut = grammer_cut(grammer)
+    print(init_data_frame(grammer_after_cut))
 main()
