@@ -17,6 +17,7 @@ is_vt = lambda x: not is_vn(x)
 # 计算列表中非终结字符的数量
 count_vn = lambda list_of_right: len(list(filter(is_vn, list_of_right)))
 
+
 """
 从文件中获得文法，成功则返回一个list，其中每个元素为一行产生式.
 """
@@ -288,12 +289,9 @@ def first_not_vt(grammer_after_cut):
             first[vn].append('ε')
 
 
-def first_property(grammer):
+def first_property(grammer_after_cut):
     """构造first集.
-
-    grammer: list, 文法列表，每个元素为文法的一行产生式.
     """
-    grammer_after_cut = grammer_cut(grammer)
     init_first_and_follow(grammer_after_cut)
     first_vt_to_first(grammer_after_cut)
     first_not_vt(grammer_after_cut)
@@ -478,8 +476,7 @@ def unone_vn_follow(grammer_after_cut):
                     
 
 
-def follow_property(grammer):
-    grammer_after_cut = grammer_cut(grammer)
+def follow_property(grammer_after_cut):
     one_vn_follow(grammer_after_cut)
     unone_vn_follow(grammer_after_cut)
     # TODO: 待解决，求产生式中只有一次vn并且为最后一个元素是，产生式头的follow集还为空
@@ -515,10 +512,9 @@ def show_follow():
         print('}')
 
 
-def first_and_follow():
-    grammer = grammer_from_file()
-    first_property(grammer)
-    follow_property(grammer)
+def first_and_follow(grammer_after_cut):
+    first_property(grammer_after_cut)
+    follow_property(grammer_after_cut)
 
 
 def init_data_frame(grammer_after_cut):
@@ -535,10 +531,42 @@ def init_data_frame(grammer_after_cut):
     data_frame = pd.DataFrame(dict_of_vts, index=vns)
     return data_frame
 
+
+def head_body_production(grammer_after_cut):
+    dict_head_body = {}
+    for production in grammer_after_cut: 
+        head = production.split('→')[0]  
+        body = production.split('→')[1]
+        dict_head_body[head] = body
+    return dict_head_body
+
+
+
+
+def build_data_frame(grammer_after_cut, data_frame):
+    """构建预测分析表
+    """
+    global first, follow
+    vns = vns_from_grammer(grammer_after_cut)
+    dict_head_body = head_body_production(grammer_after_cut)
+    for vn in vns:
+        for first_vn in first[vn]:
+            data_frame.loc[vn][first_vn] = vn + '→' + dict_head_body[vn]
+            if 'ε' in first[vn]:
+                for follow_vn in follow[vn]:
+                    data_frame.loc[vn][follow_vn] = vn + '→' + dict_head_body[vn]
+                    if '$' in follow[vn]:
+                        data_frame.loc[vn]['$'] = vn + '→' + dict_head_body[vn]
+    return data_frame
+
+
+
 def main():
-    first_and_follow()
     # TODO: 一开始获得文法的时候就应该cut，有时间再改
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
-    print(init_data_frame(grammer_after_cut))
+    first_and_follow(grammer_after_cut)
+    data_frame = init_data_frame(grammer_after_cut)
+    # data_frame.loc['PROGRAM', 'program'] = ''
+    build_data_frame(grammer_after_cut, data_frame)
 main()
