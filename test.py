@@ -363,6 +363,8 @@ def one_last_vn(grammer_after_cut):
 
 # TODO: 待解决：如果value_after_vn后面的元素也在list中出现多次
 # TODO: 则list.index(vt_after_value)会出现逻辑错误
+# TODO: 如果出现多次，可以每次index后用一个确定不会出现在列表中的元素替换，
+# TODO: 这样下一次index就不会出现重复的问题
 def recursion_vn(value_after_vn, vn, head_of_production, list_of_body):
     """找到产生时list_of_body中value_after_vn的下一个元素，如果为vt则将其加入vn的
     follow集中，结束。
@@ -370,7 +372,8 @@ def recursion_vn(value_after_vn, vn, head_of_production, list_of_body):
     如果后面都是vn且first集都包含空，则将head_of_production的follow集加入vn
     的follow集中
     """
-    if value_after_vn == list_of_body[-1]:
+    # TODO: 后续更改，更好的判断方法，其他部分代码也应该改，有时间再说：）
+    if list_of_body.index(value_after_vn) == len(list_of_body) - 1:
         head2vn_follow(head_of_production, vn)
     else:
         vt_after_value = list_of_body[list_of_body.index(value_after_vn) + 1]
@@ -414,43 +417,56 @@ def one_vn_follow(grammer_after_cut):
     """
     one_vt_vn(grammer_after_cut)
     one_last_vn(grammer_after_cut)
-    # TODO: vn后为vn的函数
     one_vn_after_vn(grammer_after_cut)
 
 
-'''
-#TODO: grammer
-def follow_property(grammer_after_cut):
+def vn_after_vn(value_after_vn, vn, head_of_production, list_of_body):
+    """处理求vn的follow集的过程中vn后的元素是非终结符的情况
     """
-    构造follow集.
-    grammer: list, 文法列表，每个元素为文法的一行产生式.
+    if value_after_vn == vn:
+        return
+    first2follow(value_after_vn, vn)
+    if list_of_body[list_of_body.index(value_after_vn)] == len(list_of_body) - 1:
+        head2vn_follow(head_of_production, vn)
+    elif is_vt(value_after_vn):
+        vt2follow(value_after_vn, vn)
+    elif 'ε' in first[value_after_vn]:
+        vt_after_value = list_of_body[list_of_body.index(value_after_vn) + 1]
+        vn_after_vn(vt_after_value, vn, head_of_production, list_of_body)
+
+
+def unone_vn_follow(grammer_after_cut):
+    """处理产生式中不止有一次vn的情况
     """
     global follow
-    vns = vns_from_grammer(grammer_after_cut)  # 用来存储所有非终结符
-    for vn in vns: # 遍历所有非终结符
+    vns = vns_from_grammer(grammer_after_cut)
+    for vn in vns:
         for production in grammer_after_cut:  # 遍历每个产生式
             head_of_production = production.split('→')[0]  # 产生式头
             list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
 
-            if vn in list_of_body:  # 如果某个非终结符的产生式中有当前非终结符
-                # 获得产生式中vn后面的字符，type:list，有多个vn也一样
-                # 如果只有一个vn并且为产生式最后一个符号则会返回False
-                values_after_vn = after_vn(vn, list_of_body)
-                # 如果该产生式只有一个要查找的vn并且为产生式的最后一个符号
-                if not values_after_vn:
-                    # 将产生式头部非终结符的follow集全部加入vn的follow集中
-                    head2vn_follow(head_of_production, vn)
-                else:
-                    for value in values_after_vn:
-                        if is_vt(value) and value not in follow[vn]:
-                            follow[vn].append(value)
-                            continue
-                        elif is_vn(value):
-                            first2follow(value, vn)
-                            if 'ε' in first[value]:
-            else:
-                continue
-                '''
+            if list_of_body.count(vn) > 1:
+                for index in range(list_of_body.count(vn)):
+                    index_of_vn = list_of_body.index(vn)
+                    if index_of_vn != len(list_of_body) - 1:
+                        value_after_vn = list_of_body[index_of_vn + 1]
+                        if is_vt(value_after_vn):
+                            follow[vn].append(value_after_vn)
+                        else:
+                            vn_after_vn(value_after_vn, vn, head_of_production, list_of_body)
+                        list_of_body[index_of_vn] = None
+                    else:
+                        head2vn_follow(head_of_production, vn)
+                    
+
+
+def follow_property(grammer):
+    grammer_after_cut = grammer_cut(grammer)
+    one_vn_follow(grammer_after_cut)
+    unone_vn_follow(grammer_after_cut)
+    # TODO: 待解决，求产生式中只有一次vn并且为最后一个元素是，产生式头的follow集还为空
+    # TODO: 因为产生式头的follo集在求follow集时在产生式中出现多次，故还为空
+    one_last_vn(grammer_after_cut)
 
 
 def show_first():
@@ -481,13 +497,12 @@ def show_follow():
         print('}')
 
 
-def main():
+def first_and_follow():
     grammer = grammer_from_file()
-    grammer_after_cut = grammer_cut(grammer)
     first_property(grammer)
+    follow_property(grammer)
 
-    # 测试关于follow的函数
-    one_vn_follow(grammer_after_cut)
-    #show_first()
-    show_follow()
+
+def main():
+    first_and_followd()
 main()
