@@ -361,24 +361,28 @@ def one_last_vn(grammer_after_cut):
                 head2vn_follow(head_of_production, vn)
 
 
-def iterable_vn(value_after_vn, vn, head_of_production, list_of_body):
+# TODO: 待解决：如果value_after_vn后面的元素也在list中出现多次
+# TODO: 则list.index(vt_after_value)会出现逻辑错误
+def recursion_vn(value_after_vn, vn, head_of_production, list_of_body):
     """找到产生时list_of_body中value_after_vn的下一个元素，如果为vt则将其加入vn的
     follow集中，结束。
     如果为vn则将其first集加入vn的follow集，如果其first集包含空，则继续查找。
     如果后面都是vn且first集都包含空，则将head_of_production的follow集加入vn
     的follow集中
     """
-    vt_after_value = list_of_body[list_of_body.index(value_after_vn) + 1]
-    flag = True
-    while flag:
-        if is_vt(vt_after_value):
-            if vt_after_value not in follow[vn]:
-                follow[vn].append(vt_after_value)
-            flag = False
-        if is_vn(vt_after_value):
-            first2follow(vt_after_value, vn)
-            if 'ε' in first[vt_after_value]:
-                iterable_vn(vt_after_value, vn, head_of_production, list_of_body)
+    if value_after_vn == list_of_body[-1]:
+        head2vn_follow(head_of_production, vn)
+    else:
+        vt_after_value = list_of_body[list_of_body.index(value_after_vn) + 1]
+        while True:
+            if is_vt(vt_after_value):
+                if vt_after_value not in follow[vn]:
+                    follow[vn].append(vt_after_value)
+                break
+            if is_vn(vt_after_value):
+                first2follow(vt_after_value, vn)
+                if 'ε' in first[vt_after_value]:
+                    iterable_vn(vt_after_value, vn, head_of_production, list_of_body)
 
 
 def one_vn_after_vn(grammer_after_cut):
@@ -394,23 +398,24 @@ def one_vn_after_vn(grammer_after_cut):
         for production in grammer_after_cut:  # 遍历每个产生式
             head_of_production = production.split('→')[0]  # 产生式头
             list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
-            value_after_vn = list_of_body[list_of_body.index(vn) + 1]
-            if list_of_body.count(vn) == 1 and is_vn(value_after_vn):
-                first2follow(value_after_vn, vn)
-                if 'ε' in first[value_after_vn]:
-                    iterable_vn(value_after_vn, vn, head_of_production, list_of_body)
-
-
+            if list_of_body.count(vn) == 1 and vn != list_of_body[-1]:
+                value_after_vn = list_of_body[list_of_body.index(vn) + 1]
+                if is_vn(value_after_vn):
+                    first2follow(value_after_vn, vn)
+                    if 'ε' in first[value_after_vn]:
+                        recursion_vn(value_after_vn, vn, head_of_production, list_of_body)
 
 
 # TODO:虽然分产生式又一次vn与多次vn分开求后逻辑清晰一些，但是会多次便利产生式子
 # TODO:带来效率上的下降，并且如ALPHABET与NUM会查几十次。。有待改善
+# TODO:可以将for循环下代码写在一起并加continue解决(未测试)
 def one_vn_follow(grammer_after_cut):
     """处理产生式中只出现一次vn的情况
     """
     one_vt_vn(grammer_after_cut)
     one_last_vn(grammer_after_cut)
     # TODO: vn后为vn的函数
+    one_vn_after_vn(grammer_after_cut)
 
 
 '''
@@ -483,5 +488,6 @@ def main():
 
     # 测试关于follow的函数
     one_vn_follow(grammer_after_cut)
+    #show_first()
     show_follow()
 main()
