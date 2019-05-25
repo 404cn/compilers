@@ -281,7 +281,7 @@ def first_property(grammer):
     first_not_vt(grammer_after_cut)
 
 
-def head2vn_follow(head_of_production, vn)
+def head2vn_follow(head_of_production, vn):
     """将head_of_production的follow集中的元素全部加入vn的follow集中.
     
     会去除重复的，但是不会去除空，此函数用于产生式中vn后的vn中包含空或者
@@ -339,13 +339,12 @@ def one_vt_vn(grammer_after_cut):
     vns = vns_from_grammer(grammer_after_cut)
     for vn in vns:
         for production in grammer_after_cut:  # 遍历每个产生式
-            head_of_production = production.split('→')[0]  # 产生式头
             list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
 
-            if (list_of_body.count(vn) == 1 and 
-                vn != list_of_body[-1] and 
-                is_vt(list_of_body[list_of_body.index(vn) + 1])):
-                follow[vn].append(list_of_body[list_of_body.index(vn) + 1])
+            if list_of_body.count(vn) == 1 and vn != list_of_body[-1]:
+                vt_after_vn = list_of_body[list_of_body.index(vn) + 1]
+                if is_vt(vt_after_vn) and vt_after_vn not in follow[vn]:
+                    follow[vn].append(vt_after_vn)
 
 
 def one_last_vn(grammer_after_cut):
@@ -362,6 +361,48 @@ def one_last_vn(grammer_after_cut):
                 head2vn_follow(head_of_production, vn)
 
 
+def iterable_vn(value_after_vn, vn, head_of_production, list_of_body):
+    """找到产生时list_of_body中value_after_vn的下一个元素，如果为vt则将其加入vn的
+    follow集中，结束。
+    如果为vn则将其first集加入vn的follow集，如果其first集包含空，则继续查找。
+    如果后面都是vn且first集都包含空，则将head_of_production的follow集加入vn
+    的follow集中
+    """
+    vt_after_value = list_of_body[list_of_body.index(value_after_vn) + 1]
+    flag = True
+    while flag:
+        if is_vt(vt_after_value):
+            if vt_after_value not in follow[vn]:
+                follow[vn].append(vt_after_value)
+            flag = False
+        if is_vn(vt_after_value):
+            first2follow(vt_after_value, vn)
+            if 'ε' in first[vt_after_value]:
+                iterable_vn(vt_after_value, vn, head_of_production, list_of_body)
+
+
+def one_vn_after_vn(grammer_after_cut):
+    """处理产生时中只出现一次vn并且vn后面的字符为vn时的情况
+
+    将后边的vn的first集中非空元素加入要查找的vn的follow集中，如果后边的
+    vn包含空，则继续向后查找，直到找到vt或者要查找的vn后面全是非终结符并且
+    都包含空，则把产生式头部非终结符的follow集加入要查找的vn的follow集中
+    """
+    global follow
+    vns = vns_from_grammer(grammer_after_cut)
+    for vn in vns:
+        for production in grammer_after_cut:  # 遍历每个产生式
+            head_of_production = production.split('→')[0]  # 产生式头
+            list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
+            value_after_vn = list_of_body[list_of_body.index(vn) + 1]
+            if list_of_body.count(vn) == 1 and is_vn(value_after_vn):
+                first2follow(value_after_vn, vn)
+                if 'ε' in first[value_after_vn]:
+                    iterable_vn(value_after_vn, vn, head_of_production, list_of_body)
+
+
+
+
 # TODO:虽然分产生式又一次vn与多次vn分开求后逻辑清晰一些，但是会多次便利产生式子
 # TODO:带来效率上的下降，并且如ALPHABET与NUM会查几十次。。有待改善
 def one_vn_follow(grammer_after_cut):
@@ -372,6 +413,7 @@ def one_vn_follow(grammer_after_cut):
     # TODO: vn后为vn的函数
 
 
+'''
 #TODO: grammer
 def follow_property(grammer_after_cut):
     """
@@ -401,20 +443,45 @@ def follow_property(grammer_after_cut):
                         elif is_vn(value):
                             first2follow(value, vn)
                             if 'ε' in first[value]:
-
             else:
                 continue
+                '''
+
+
+def show_first():
+    """格式化输出first集
+    """
+    global first
+    for key in first.keys():
+        print('First(', key, ')=', end='{')
+        for value in first[key]:
+            if value != first[key][-1]:
+                print(value, end=',')
+            else:
+                print(value, end='')
+        print('}')
+
+
+def show_follow():
+    """格式化输出follow集
+    """
+    global follow
+    for key in follow.keys():
+        print('Follow(', key, ')=', end='{')
+        for value in follow[key]:
+            if value != follow[key][-1]:
+                print(value, end=',')
+            else:
+                print(value, end='')
+        print('}')
 
 
 def main():
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
-    """
     first_property(grammer)
-    for key in first.keys():
-        print(key)
-        print(first[key])
-    print(follow)
-    """
-    follow_property(grammer_after_cut)
+
+    # 测试关于follow的函数
+    one_vn_follow(grammer_after_cut)
+    show_follow()
 main()
