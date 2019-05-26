@@ -70,6 +70,12 @@ def vns_from_grammer(grammer_after_cut):
     return vns
 
 
+def vns_from_file():
+    grammer = grammer_from_file()
+    grammer_after_cut = grammer_cut(grammer)
+    return vns_from_grammer(grammer_after_cut)
+
+
 def vts_from_grammer(grammer_after_cut):
     """获得一个被分割文法后的所有终结符
     """
@@ -81,6 +87,11 @@ def vts_from_grammer(grammer_after_cut):
                 vts.append(vt)
     return vts
     
+
+def vts_from_file():
+    grammer = grammer_from_file()
+    grammer_after_cut = grammer_cut(grammer)
+    return vts_from_grammer(grammer_after_cut)
 
 
 """
@@ -560,7 +571,16 @@ def build_data_frame(grammer_after_cut, data_frame):
     return data_frame
 
 
+def data_frame():
+    grammer = grammer_from_file()
+    grammer_after_cut = grammer_cut(grammer)
+    first_and_follow(grammer_after_cut)
+    data_frame = init_data_frame(grammer_after_cut)
+    # data_frame.loc['PROGRAM', 'program'] = ''
+    return build_data_frame(grammer_after_cut, data_frame)
+    
 
+"""
 def main():
     # TODO: 一开始获得文法的时候就应该cut，有时间再改
     grammer = grammer_from_file()
@@ -570,3 +590,4 @@ def main():
     # data_frame.loc['PROGRAM', 'program'] = ''
     build_data_frame(grammer_after_cut, data_frame)
 main()
+"""

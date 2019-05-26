@@ -47,7 +47,7 @@ def scaner(file):
             if token not in code_file:
                 char2memory.write(format_string("id", token))
             else:
-                char2memory.write(format_string(token, ''))
+                char2memory.write(format_string(token, token))
         elif ch in digits:
             token += ch
             ch = char_from_file()
