@@ -4,6 +4,7 @@
 import DataFrame
 from Stack import Stack
 
+productions = DataFrame.productions()
 data_map = DataFrame.data_frame()
 vns = DataFrame.vns_from_file()
 vts = DataFrame.vts_from_file()
@@ -30,12 +31,53 @@ def next_token():
     return str(token[0])
 
 
+def init_stack():
+    global stack, vns
+    stack.push('$')
+    stack.push(vns[0])
+
+
+def reverse_production_body_to_stack(production):
+    global stack
+    reverse_body = production.split('→')[1].split(' ')
+    reverse_body.reverse()
+    for value in reverse_body:
+        stack.push(value)
+
+
+def error():
+    print('error')
+
+
+def parsing():
+    global data_map, vns, vts, stack
+    token = next_token()
+    top = stack.peek()
+    while top != '$':
+        if top == token:
+            stack.pop()
+            token = next_token()
+        elif DataFrame.is_vt(top):
+            error()
+            break
+        elif data_map.loc[top][token] == '':
+            error()
+            break
+        elif data_map.loc[top][token] in productions:
+            print(data_map.loc[top][token])
+            stack.pop()
+            reverse_production_body_to_stack(data_map.loc[top][token])
+        top = stack.peek()
+
+
 def main():
+    global data_map
     init_tokens()
-    print(next_token())
-    print(next_token())
-    print(next_token())
-    print(next_token())
-    print(next_token())
-    print(next_token())
+    init_stack()
+    data_map.to_csv('test.csv')
+    '''
+    parsing()
+    DataFrame.show_first()
+    DataFrame.show_follow()
+    '''
 main()
