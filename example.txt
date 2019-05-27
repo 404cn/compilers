@@ -1,18 +1,18 @@
 program a;
-    var x, y, z, m, n:integer; f:real
+    var x, y, z, m, n:integer, f:real;
     begin
-        x:=+1,2    // x=1+2
-        y:=-*x,3,2  // y=x*3-2
-        z:=-/y,2,5  // z=y/2-5
-        if x < z then 
-            x:=+1,x 
-        else 
-            z:=-1,z
-        while x <= y do 
-            x:=+1,x 
+        x:=+1,2;    // x=1+2
+        y:=-*x,3,4;  // y=x*3-2
+        z:=-/y,5,6;  // z=y/2-5
+        if x < z then
+            x:=+7,x
+        else
+            z:=-8,z;
+        while x <= y do
+            x:=+9,x;
         begin
-            f:=1
-            m:=2
+            f:=1;
+            m:=2;
             n:=3
-        end 
-    end.
+        end
+    end

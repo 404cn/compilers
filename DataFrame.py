@@ -589,14 +589,16 @@ def default_handle(data_frame, vn, first_vn, dict_head_body):
             data_frame.loc[vn][first_vn] = vn + '→' + value
 
 
-def none_in_first(data_frame, vn, dict_head_body):
+def none_in_first(vn, value, data_frame):
     """处理在构造预测分析表的过程中vn的first集包含空的情况
     """
     global follow
     for follow_vn in follow[vn]:
-        default_handle(data_frame, vn, follow_vn, dict_head_body)
+        if data_frame.loc[vn][follow_vn] == '':
+            data_frame.loc[vn][follow_vn] = value
         if '$' in follow[vn]:
-            data_frame.loc[vn][follow_vn] = vn + '→' + dict_head_body[vn][0]
+            data_frame[vn]['$'] = value
+
 
 def build_data_frame(grammer_after_cut, data_frame):
     """构建预测分析表
@@ -606,15 +608,17 @@ def build_data_frame(grammer_after_cut, data_frame):
     dict_head_body = head_body_production(grammer_after_cut)
     for vn in dict_head_body.keys():
         for key, value in dict_head_body[vn].items():
-            print(vn, key, value)
-    '''
+            if is_vt(key):
+                data_frame.loc[vn][key] = value
+                if key == 'ε':
+                    none_in_first(vn, value, data_frame)
+            if is_vn(key):
+                for first_key in first[key]:
+                    data_frame.loc[vn][first_key] = value
+                    if 'ε' in first[key]:
+                        none_in_first(vn, value, data_frame)
     return data_frame
-    '''
 
-
-grammer = grammer_from_file()
-grammer_after_cut = grammer_cut(grammer)
-print(build_data_frame(grammer_after_cut))
 
 def data_frame():
     grammer = grammer_from_file()

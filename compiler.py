@@ -56,7 +56,9 @@ def scaner(file):
                 token += ch
                 ch = char_from_file()
             # 将字符串转换为二进制存储，二进制以0b开头，故使用[2:]
-            char2memory.write(format_string("num", bin(int(token))[2:]))
+            # TODO: 如果转换为二进制在语法分析师如果超过1位数，例如10则会找不到产生时
+            # char2memory.write(format_string("num", bin(int(token))[2:]))
+            char2memory.write(format_string("num", token))
         elif ch in [',', ';', '+', '-', '*', '=', '.']:
             char2memory.write(format_string(ch, ch))
             ch = char_from_file()

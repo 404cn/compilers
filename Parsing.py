@@ -45,26 +45,27 @@ def reverse_production_body_to_stack(production):
         stack.push(value)
 
 
-def error():
-    print('error')
-
-
 def parsing():
     global data_map, vns, vts, stack
     token = next_token()
     top = stack.peek()
     while top != '$':
         if top == token:
+            print('匹配 ' + top)
             stack.pop()
             token = next_token()
+        elif top == 'ε':
+            stack.pop()
         elif DataFrame.is_vt(top):
-            error()
+            print('error, is_vt')
+            print(stack)
             break
         elif data_map.loc[top][token] == '':
-            error()
+            print('error, 空')
+            print(stack)
             break
         elif data_map.loc[top][token] in productions:
-            print(data_map.loc[top][token])
+            print('输出 ' + data_map.loc[top][token])
             stack.pop()
             reverse_production_body_to_stack(data_map.loc[top][token])
         top = stack.peek()
@@ -74,9 +75,9 @@ def main():
     global data_map
     init_tokens()
     init_stack()
-    data_map.to_csv('test.csv')
-    '''
     parsing()
+    '''
+    data_map.to_csv('test.csv')
     DataFrame.show_first()
     DataFrame.show_follow()
     '''
