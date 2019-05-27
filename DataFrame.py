@@ -549,11 +549,11 @@ def head_body_production(grammer_after_cut):
     dict_head_body = {}
     vns = vns_from_grammer(grammer_after_cut)
     for vn in vns:
-        dict_head_body[vn] = []
+        dict_head_body[vn] = {}
     for production in grammer_after_cut: 
         head = production.split('→')[0]  
         body = production.split('→')[1]
-        dict_head_body[head].append(body)
+        dict_head_body[head][body.split(' ')[0]] = production
     return dict_head_body
 
 
@@ -584,6 +584,10 @@ def default_handle(data_frame, vn, first_vn, dict_head_body):
         elif len(dict_head_body[vn]) > 1:
             if first_vn == value:
                 data_frame.loc[vn][first_vn] = vn + '→' + value
+    for value in dict_head_body[vn]:
+        if data_frame.loc[vn][first_vn] == '':
+            data_frame.loc[vn][first_vn] = vn + '→' + value
+
 
 def none_in_first(data_frame, vn, dict_head_body):
     """处理在构造预测分析表的过程中vn的first集包含空的情况
@@ -600,15 +604,17 @@ def build_data_frame(grammer_after_cut, data_frame):
     global first
     vns = vns_from_grammer(grammer_after_cut)
     dict_head_body = head_body_production(grammer_after_cut)
-    for vn in vns:
-        for first_vn in first[vn]:
-            default_handle(data_frame, vn, first_vn, dict_head_body)
-            '''
-            if 'ε' in first[vn]:
-                none_in_first(data_frame, vn, dict_head_body)
-                '''
+    for vn in dict_head_body.keys():
+        for key, value in dict_head_body[vn].items():
+            print(vn, key, value)
+    '''
     return data_frame
+    '''
 
+
+grammer = grammer_from_file()
+grammer_after_cut = grammer_cut(grammer)
+print(build_data_frame(grammer_after_cut))
 
 def data_frame():
     grammer = grammer_from_file()
@@ -627,7 +633,7 @@ def productions():
         productions.append(production)
     return productions
 
-"""
+'''
 def main():
     # TODO: 一开始获得文法的时候就应该cut，有时间再改
     grammer = grammer_from_file()
@@ -635,6 +641,6 @@ def main():
     first_and_follow(grammer_after_cut)
     data_frame = init_data_frame(grammer_after_cut)
     # data_frame.loc['PROGRAM', 'program'] = ''
-    build_data_frame(grammer_after_cut, data_frame)
+    print(build_data_frame(grammer_after_cut, data_frame))
 main()
-"""
+'''
