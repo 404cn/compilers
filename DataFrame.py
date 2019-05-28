@@ -18,10 +18,9 @@ is_vt = lambda x: not is_vn(x)
 count_vn = lambda list_of_right: len(list(filter(is_vn, list_of_right)))
 
 
-"""
-从文件中获得文法，成功则返回一个list，其中每个元素为一行产生式.
-"""
 def grammer_from_file():
+    """从文件中获得文法，成功则返回一个list，其中每个元素为一行产生式.
+    """
     # 声明一个文法列表，用来保存各个文法的产生式子
     grammer = []
     with open('./law.english.txt', 'r') as f:
@@ -36,11 +35,10 @@ def grammer_from_file():
     return grammer
 
 
-"""
-把包含选择运算符的产生式分为两个.
-grammer: list, 文法列表，每个元素为文法的一行产生式.
-"""
 def grammer_cut(grammer):
+    """把包含选择运算符的产生式分为两个.
+    grammer: list, 文法列表，每个元素为文法的一行产生式.
+    """
     grammer_after_cut = []
     for line in grammer:
         if '|' in line:
@@ -71,6 +69,8 @@ def vns_from_grammer(grammer_after_cut):
 
 
 def vns_from_file():
+    """返回文法中所有非终结符(list)
+    """
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
     return vns_from_grammer(grammer_after_cut)
@@ -89,6 +89,8 @@ def vts_from_grammer(grammer_after_cut):
     
 
 def vts_from_file():
+    """返回文法中所有终结符(list)
+    """
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
     return vts_from_grammer(grammer_after_cut)
@@ -488,6 +490,8 @@ def unone_vn_follow(grammer_after_cut):
 
 
 def follow_property(grammer_after_cut):
+    """构建follow集
+    """
     one_vn_follow(grammer_after_cut)
     unone_vn_follow(grammer_after_cut)
     # TODO: 待解决，求产生式中只有一次vn并且为最后一个元素是，产生式头的follow集还为空
@@ -524,11 +528,15 @@ def show_follow():
 
 
 def first_and_follow(grammer_after_cut):
+    """构建first集与follow集
+    """
     first_property(grammer_after_cut)
     follow_property(grammer_after_cut)
 
 
 def init_data_frame(grammer_after_cut):
+    """初始化预测分析表
+    """
     vns = vns_from_grammer(grammer_after_cut)
     vts = vts_from_grammer(grammer_after_cut)
     dict_of_vts = {}
@@ -557,24 +565,6 @@ def head_body_production(grammer_after_cut):
     return dict_head_body
 
 
-'''
-# TODO: error
-def build_data_frame(grammer_after_cut, data_frame):
-    """构建预测分析表
-    """
-    global first, follow
-    vns = vns_from_grammer(grammer_after_cut)
-    dict_head_body = head_body_production(grammer_after_cut)
-    for vn in vns:
-        for first_vn in first[vn]:
-            data_frame.loc[vn][first_vn] = vn + '→' + dict_head_body[vn]
-            if 'ε' in first[vn]:
-                for follow_vn in follow[vn]:
-                    data_frame.loc[vn][follow_vn] = vn + '→' + dict_head_body[vn]
-                    if '$' in follow[vn]:
-                        data_frame.loc[vn]['$'] = vn + '→' + dict_head_body[vn]
-    return data_frame
-    '''
 def default_handle(data_frame, vn, first_vn, dict_head_body):
     """在构造预测分析表的过程中的默认处理方式
     """
@@ -621,6 +611,8 @@ def build_data_frame(grammer_after_cut, data_frame):
 
 
 def data_frame():
+    """获取预测分析表
+    """
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
     first_and_follow(grammer_after_cut)
@@ -630,21 +622,11 @@ def data_frame():
     
 
 def productions():
+    """获取语法中的所有产生式(list)
+    """
     productions = []
     grammer = grammer_from_file()
     grammer_after_cut = grammer_cut(grammer)
     for production in grammer_after_cut:
         productions.append(production)
     return productions
-
-'''
-def main():
-    # TODO: 一开始获得文法的时候就应该cut，有时间再改
-    grammer = grammer_from_file()
-    grammer_after_cut = grammer_cut(grammer)
-    first_and_follow(grammer_after_cut)
-    data_frame = init_data_frame(grammer_after_cut)
-    # data_frame.loc['PROGRAM', 'program'] = ''
-    print(build_data_frame(grammer_after_cut, data_frame))
-main()
-'''

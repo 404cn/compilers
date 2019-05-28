@@ -13,6 +13,8 @@ tokens = []
 
 
 def init_tokens():
+    """用存储词法分析的结果的文件初始化tokens
+    """
     global tokens
     with open("./result.txt", 'r') as f:
         buffer = f.read().split('\n')
@@ -25,6 +27,8 @@ def init_tokens():
 
 
 def next_token():
+    """读取下一个token
+    """
     global tokens
     token = tokens[0:1]
     tokens = tokens[1:]
@@ -32,12 +36,16 @@ def next_token():
 
 
 def init_stack():
+    """初始化栈，将$(代表输入结束)与文法开始符压入栈中
+    """
     global stack, vns
     stack.push('$')
     stack.push(vns[0])
 
 
 def reverse_production_body_to_stack(production):
+    """将产生式中每个元素逆向入栈
+    """
     global stack
     reverse_body = production.split('→')[1].split(' ')
     reverse_body.reverse()
