@@ -80,13 +80,13 @@ def vts_from_grammer(grammer_after_cut):
     """获得一个被分割文法后的所有终结符
     """
     vts = []
-    for production in grammer_after_cut: 
+    for production in grammer_after_cut:
         list_of_body = production.split('→')[1].split(' ')
         for vt in list_of_body:
             if is_vt(vt) and vt not in vts:
                 vts.append(vt)
     return vts
-    
+
 
 def vts_from_file():
     """返回文法中所有终结符(list)
@@ -96,11 +96,10 @@ def vts_from_file():
     return vts_from_grammer(grammer_after_cut)
 
 
-"""
-找到文法中的非终结符vn并为其建立各自的first集和follow集.
-grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
-"""
 def init_first_and_follow(grammer_after_cut):
+    """
+    找到文法中的非终结符vn并为其建立各自的first集和follow集.
+    grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.        """
     global first, follow
     vns = vns_from_grammer(grammer_after_cut)
     for key in vns:
@@ -109,11 +108,11 @@ def init_first_and_follow(grammer_after_cut):
     follow[vns[0]].append('$')
 
 
-"""
-找到字符串中第一个非终结字符，没找到反回False.
-line: String, 文法中的一行产生式.
-"""
 def first_vn_from_line(line):
+    """
+    找到字符串中第一个非终结字符，没找到反回False.
+    line: String, 文法中的一行产生式.
+    """
     if line.find('→') != -1:
         # 得到右侧第一个字符串
         list_of_right = line.split('→')[1].split(' ')
@@ -127,11 +126,11 @@ def first_vn_from_line(line):
             return False
 
 
-"""
-找到字符串中第二个非终结字符，没找到返回False.
-line: String, 文法中的一行产生式.
-"""
 def second_vn_from_line(line):
+    """
+    找到字符串中第二个非终结字符，没找到返回False.
+    line: String, 文法中的一行产生式.
+    """
     first_vn = first_vn_from_line(line)
     if first_vn:
         index_of_first_vn = line.find(first_vn)
@@ -141,11 +140,11 @@ def second_vn_from_line(line):
         return False
 
 
-"""
-找到字符串中最后一个非终结字符，没找到返回False.
-line: String, 文法中的一行产生式.
-"""
 def last_vn_from_line(line):
+    """
+    找到字符串中最后一个非终结字符，没找到返回False.
+    line: String, 文法中的一行产生式.
+    """
     list_of_right = line.split('→')[1].split(' ')
     # list_of_right 必须是一个list
     count = count_vn(list_of_right)
@@ -158,13 +157,13 @@ def last_vn_from_line(line):
                 return list_of_right[-i]
 
 
-"""
-扫描文法中每一个产生式，如果右边第一个符号是一个非终结符号，
-就把它加到产生式左边非终结符号的First集中去.
-grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
-"""
 def first_vt_to_first(grammer_after_cut):
-    global first, is_vt
+    """
+    扫描文法中每一个产生式，如果右边第一个符号是一个非终结符号，
+    就把它加到产生式左边非终结符号的First集中去.
+    grammer_after_cut: list, 被消除选择运算符后的文法，每个元素为一个产生式.
+    """
+    global first
     for line in grammer_after_cut:
         index_of_derive = line.find('→')
         vn = line[:index_of_derive]
@@ -312,7 +311,7 @@ def first_property(grammer_after_cut):
 
 def head2vn_follow(head_of_production, vn):
     """将head_of_production的follow集中的元素全部加入vn的follow集中.
-    
+
     会去除重复的，但是不会去除空，此函数用于产生式中vn后的vn中包含空或者
     vn在产生式中只出现一次并后面没有任何元素的情况
     """
@@ -359,7 +358,7 @@ def after_vn(vn, list_of_body):
             if list_of_body[i] == vn and list_of_body[i + 1] not in values_after_vn:
                 values_after_vn.append(list_of_body[i + 1])
     return values_after_vn
-        
+
 
 def one_vt_vn(grammer_after_cut):
     """产生式只有一次vn且vn后为vt，将vt加入vn的follow集中
@@ -386,7 +385,7 @@ def one_last_vn(grammer_after_cut):
         for production in grammer_after_cut:  # 遍历每个产生式
             head_of_production = production.split('→')[0]  # 产生式头
             list_of_body = production.split('→')[1].split(' ')  # 产生式体列表
-            if list_of_body.count(vn) == 1 and vn == list_of_body[-1]: 
+            if list_of_body.count(vn) == 1 and vn == list_of_body[-1]:
                 head2vn_follow(head_of_production, vn)
 
 
@@ -486,7 +485,7 @@ def unone_vn_follow(grammer_after_cut):
                         list_of_body[index_of_vn] = None
                     else:
                         head2vn_follow(head_of_production, vn)
-                    
+
 
 
 def follow_property(grammer_after_cut):
@@ -558,8 +557,8 @@ def head_body_production(grammer_after_cut):
     vns = vns_from_grammer(grammer_after_cut)
     for vn in vns:
         dict_head_body[vn] = {}
-    for production in grammer_after_cut: 
-        head = production.split('→')[0]  
+    for production in grammer_after_cut:
+        head = production.split('→')[0]
         body = production.split('→')[1]
         dict_head_body[head][body.split(' ')[0]] = production
     return dict_head_body
@@ -619,7 +618,7 @@ def data_frame():
     data_frame = init_data_frame(grammer_after_cut)
     # data_frame.loc['PROGRAM', 'program'] = ''
     return build_data_frame(grammer_after_cut, data_frame)
-    
+
 
 def productions():
     """获取语法中的所有产生式(list)
