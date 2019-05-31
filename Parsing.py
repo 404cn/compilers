@@ -83,10 +83,10 @@ def main():
     global data_map
     init_tokens()
     init_stack()
-    parsing()
-    '''
-    data_map.to_csv('test.csv')
     DataFrame.show_first()
     DataFrame.show_follow()
+    '''
+    parsing()
+    data_map.to_csv('test.csv')
     '''
 main()
